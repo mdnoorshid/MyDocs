@@ -1,0 +1,266 @@
+                                           ROI Framework
+                                       ====================
+==>First of all we should understand the projects hierarchy
+                   roi-MetaModel-jdbc  --->MetaModel-jdbc is used for the multiple databases like  MySQL,cassandra,hbase etc.
+                         |
+                         |
+                    mesh-camel         
+                         |              
+                         |
+                    roi-framework      ---->Here we will get all resources like featureMetaInfo.xsd,featureService.xsd,permastore.xsd,
+                         |                  eventing.xsd etc..It also contains all db configuration properties files.
+                         |
+                    mesh-core         --->This project is for the base entry for the camel.Here we will get baseroute.xml,and beans.xml.
+                         |                In baseroute.xml we define the routeContext ids and in beans.xml we define the file names of iplem-
+                         |                entation and execution xml files.
+                 [implementation project]--->Here we write our own implementation route and this project depends on mesh-core and roi-
+                         |                   framework.Dependenct means it needs mesh-core and roi-framework dependency in its pom.
+                         |
+                 [execution project]     --->In this project we define execution route.
+                         |
+                         |
+                  feature-installer      --->In this project there is the logic to deploy any feature that is it contains featureMetaInfo.xml
+                                             which is available on feature installer.
+
+===>Hierarchy for the feature:
+                        
+                        tenant
+                          |
+                          |
+                        site
+                          |
+                          |
+                      featureGroup 
+                          |
+                          |
+                       feature
+                          |
+                          |
+                     Implementation
+                          |
+                          |
+                        vendor
+                          |
+                          |
+                        version
+
+==>There are the following important tables for the roi databases:
+     ##confignode:Here we have to pass nodeId,nodeName,isRoot,hasChildren,parentNodeId,description,type,level,version,primaryFeatureId
+                  for every tenant,site,feature_Group,feature,implementation,vendor,and version.Here we can use tenant and site as all.
+                  So we have to define only for feature_Group,feature,implementation,vendor,and version.Here hierarchy is very important 
+                  for the defining the isRoot,hasChildren,parentNodeId.If for any feature if it has children we have to define in hasChildren
+                  as 1 and if it has parentNode we have to define the parentNodeId of its parentNode.
+     ##featureMaster:Here we have to define featureMasterId 
+                    featureName,featureGroup,siteId,version,description,multiVendorSupport,allowMultipleImpl,product before calling 
+                    for the deployment.
+     ##confignodedata:After the deployment of the project all values related to the feature is stored in this table.
+                      (For running the same program and rid off from the conflict of duplicate datas donot forget to delete the table's data)
+     ##featureDeployment:After the deployment of the project all values related to the feature is stored in this table including 
+                         featureMasterId.           
+                       (For running the same program and rid off from the conflict of duplicate datas donot forget to delete the table's data)
+
+                                   Steps to write feature using Roi framework
+                                 -----------------------------------------------
+1.First of all we have to create two fuse projects in fuseIde.(Named as implemetation and execution)
+2.Import the the both projects in the workspace of eclipse.
+3.Configure the project implementation and execution routes in the beans.xml and baseroute.xml of the mesh-core(Camel Related work) project.
+  In bean.xml--->We define the files of both execution and implementation route.
+     baseroute.xml--->We define the ids of the implementation and execution route.
+4.Write featureMetaInfo and featureService in the implementation project.
+5.Now define  feature in the confignode,featureMaster tables.
+6.In Execution file define Transformation route and Execution route properly.
+   **Flow of the routes will be as follows
+                 TR      
+                 |         ====>TR&ER(Transformation Route and Execution Route) will be defined togeteher in Execution project
+                 ER
+                 |
+                 IR        ====>IR(Implementation Route) should be defined in the Implementation Project.
+
+       Naming of the route should be as follows:
+       1.TR
+          ===>direct:<featureName>-<serviceName>-TR
+       2.ER
+          ===>direct:<featureName>-<serviceName>-ER
+       3.IR
+          ===>direct:<featureName>-<serviceName>-<implementation>-<vendor>-IR
+7.VVI Points:
+  **We have to add implementation project dependency to the execution pom and execution project dependency to the 
+    feature installer pom.We do so that the jars will be available to the dependent projects.
+    We should make sure that jars are available as libraries not as Proejcts to the dependent projects.
+  **We have to add mesh-core & roi-framework dependency to the pom of implementation project.
+   (These steps are neccessary otherwise we will encounter with the errors)
+  **We have to insert the required deatils in 'featureMaster' table and 'confignode' table.
+  **While entering the details in 'confignode' table we have to keep in mind the hierarchy and then put the parentNodeId 
+    according to that.
+    For confignode we have to enter the details for each features 
+    tenant--->site--->featureGroup--->feature--->Implementation--->vendor--->version
+    sample for insert in the confignode table:insert into featureMaster values (23,'calc','calcGroup',23,'1.0','test description 
+                                               value',1,1,'wms2.0');
+  ##WE HAVE TO ENTER THE DETAILS IN BOTH THE TABLE BEFORE RUNNING THE APPLICATION
+   
+8.To start the TR(Transformation Route) we must fired from the RestClient.
+  URL should be like:
+                     http://localhost:9080/ecomm/json/<featureGroup>/<feature>/<serviceType>
+
+                       
+                              Permastore
+                         ---------------------
+===>permastore.xml stores such data which does not changed frequently.It stores 
+    the data in the cache memory at the very time of loading of the application.
+    **The data from the permastore loads during the time of loading of application.
+===>##Loading Part::
+    The data in permastore can be store or build  in three ways:
+    1.CustomBuilder --->Define our own class and it can fetched data from both database and cache
+    2.SQLBuilder    --->We define SQL query and we can fetched data from only Database.
+    3.InlineBuilder --->We give hardcoded value and we can fetch it directly.
+===>##Fetching Part::(In case of InlineBuilder)
+    1.First of all define peramstoreConfiguration in Permastore.xml.
+    2.Then we have to pass the following bean in the implementation route:
+       <to uri="bean:meshConfigUtil?method=getPermastoreConfiguration("Name of the permastore")"/>
+    3.In java class(where we want use permastore data) we have to define the Object of MeshHeader.
+      And we can get the MeshHeaderConstant using the MESH_HEADER_KEY.
+      **MeshHeader meshHeader=(MeshHeader) exchange.getIn().getHeader(MeshHeaderConstant.MESH_HEADER_KEY);
+      --->Next we have to call the method getPermadata();
+          This will return the permaData in 'Map' format.
+          So we have to get the permaData like below:
+          **Map<String,Object> permaData=meshHeader.getPermadata();
+       **VVI:We can have multiple peramstoreConfiguration in Permastore.xml. So to load all peramstoreConfiguration
+             then we have to pass the bean after giving each peramstoreConfiguration name in the method paramter.
+              In java class we can get specific permastore after calling Map and passing the name of peramstoreConfiguration
+              as key.
+           OverAll In java we have to do
+          ===============================
+          ****************************************************************************************************** 
+          *MeshHeader meshHeader=(MeshHeader) exchange.getIn().getHeader(MeshHeaderConstant.MESH_HEADER_KEY);  *
+          *Map<String,Object> permaData=meshHeader.getPermadata();                                             *
+          *String jsonAsString=permaData.get("name of peramstoreConfiguration").toString();                    *
+          ******************************************************************************************************
+===>##Fetching Part::(In case of Custom Builder)
+     ---->In this type of permastore we have to build a custom class
+          which implements IPermaStoreCustomCacheObjectBuilder Interface.
+     ---->Next we have to override the method loadDataForCache() which 
+          takes parameter as CustomBuilder.In this method we will write
+          the logic for fetching data either from database or cache.
+     ---->Once we will get the data in Permastore.xml we will repeat the
+          same steps as mentioned in above fetching part.
+
+                                     Eventing
+                                  --------------
+---->An Event is a change of state in a software system. Eventing is referred to as propagating messages 
+     which contain those event information through publish and subscribe.
+     **We can say event is data specify something
+   ===>There are two types of events:
+       ##System Event:This event has to be generated when system fails or success.
+       ##Internal Event:This event is generated internal of the system.
+                        There we can do two type of internal eventing
+                        (i)with component 
+                        (ii)without component    
+       --->In internal event we have to pass the following attributes:
+           1.EventId :- what is the event name
+           2.Event Params :- What will be the params
+           3.Producer :- When to do, where to do
+           4.Event Builder :- how to build
+           5.DispatcherId: Provide Dispatcher Id actually where to Dispatch.
+           6.TransformationType: How to Transform the events
+                                 There are two ways for Transforamtion:
+                                 <i>JSON
+                                 <ii>XML-XSLT(For this we need to provide our own xslt which will take the the original xml and 
+                                    will produce the same xml)
+                                  The xslt will be like as:
+                                
+                                  <xsl:stylesheet xmlns:xsl="http://www.w3.org/1999/XSL/Transform"   
+	                                                                           version="1.0">  
+                                   <xsl:template match="@*|node()">                                   
+                                    <xsl:copy>
+                                    <xsl:apply-templates select="@*|node()"/>
+                                   </xsl:copy>
+                                  </xsl:template>
+                                 </xsl:stylesheet>
+
+---->For the eventing we need to select DispatchChanels.There are four Dispatch channels
+     (i)EVT_FILE_STORE
+     (ii)FILE_STORE
+     (iii)KAFKA
+     (iv)REST_CLIENT
+      --->In Dispatch channel we need to provide Implementation and Configuration.
+          ##Implementation:In implementation we need to give fully qualified class name of 'FileStoreDispatchChanel'
+          ##Configuration:In configuration we need to give 'filepath' and 'filename' as json object.
+--->Here after comes 'SystemEvent'.
+    There are two types of SystemEvent we have to do:
+    <i>SERVICE_COMPLETION_SUCCESS && <ii>SERVICE_COMPLETION_FAILURE
+--->Now we have to define our own events
+    For this the parent tag is Events .
+    Its child tag is Event
+    **Event ---->Here we provide id,type(internal,system),and description as attributes
+                 and all required details in child tags.
+                 So Event child tags are:
+                 <1>EventParams:It has own child tag EventParam where we give name,dataType,validationRegx as attributes.
+                 <2>CamelEventProducer: It has two children:
+                                        <i>CamelProducerConfig:Here we pass serviceName,feature,component,raiseOn(it can be success)
+                                                               as attributes.
+                                        <ii>CamelEventBuilder:Here we pass the types of builder which can be 'CUSTOM' or 'OGNL'
+                                                              It has also one child tag:
+                                                              <a>EventBuilder:Here we pass fqcn(fully qualified class name) and
+                                                                              beanRefid as attributes.
+                 <3>dis:EventDispatchers:It has one child tag EventDispatcher.
+                                         <i>EventDispatcher:It has two child nodes:
+                                                            <a>DispatchChanelId--->We need pass the id of Dispatcher Chanel as value in the 
+                                                                                   field.
+                                         <ii>EventTransformation:In EventTransformation we need to pass Type(JSON,XML-XSLT) as attribute.
+                                                                 In case of XML-XSLT it has one child tag called as XSLTName where we provide
+                                                                 XSL file name.
+                 Notes
+               ========
+   --->For CUSTOM EventBuilder(when we do for XML-XSLT) type we have to make our own class and then we have to pass the fqcn in the attribute 
+       of the Event Builder.
+       **How to build this class:
+          1.First of all we have to extends our custom class to AbstractCamelEventBuilder.
+          2.Then ovveride the method buildEvent() which has the parameters Exchange and Event and return type is 'ROIEvent' class.
+          3.Then we will make an object of MeshHeader which will take header from the exchange.
+           **MeshHeader meshHeader=(MeshHeader) exchange.getIn().getHeader(MeshHeaderConstant.MESH_HEADER_KEY);
+          4.Then make an object of ROIEvent as follows:
+             ROIEvent roiEvent=new ROIEvent(eventConfig.getId(),meshHeader.getRequestContext());
+          5.We will make an object of Json.
+            In that we will put tenantId and siteId in the jsonObject after getting from meshHeader.
+            **eventHeaderJsonObject.put("TenantId", meshHeader.getTenant().toString());
+            **eventHeaderJsonObject.put("SiteId", meshHeader.getSite().toString());
+          6.Now we will make another json object where will put templateId and templateType which we can get from the exchange header
+            **eventPayloadJsonObject.put("templateid", exchange.getIn().getHeader("employeeId"));
+ 	    **eventPayloadJsonObject.put("templateType",exchange.getIn().getHeader("template") );
+          7.Now we will add both of the jsonObjects in the roi object as follows:
+            **roiEvent.addEventHeader("EVENTHEADER", eventHeaderJsonObject.toString());
+            **roiEvent.addEventParam("EVENTPAYLOAD", eventPayloadJsonObject.toString());
+           ##Here toString is overrided as below in the ROIEvent class:
+             @Override
+	     public String toString() {
+		return "ROIEvent [eventId=" + eventId + ", eventHeader=" + eventHeader + ", eventParam=" + eventParam + "]";
+	     }
+           ##For debugging purpose we have to keep in the mind for class when we are doing XML-XSLT EventTransformation type:
+             'com.getusroi.eventframework.dispatcher.transformer.XmlTransformerHelper' which will be available in the roi-framwork.
+
+
+
+         
+         
+                                                                                   
+                                                             
+                         
+                                         
+                                    
+
+                                       
+    
+
+     
+          
+
+
+   
+
+ 
+
+
+
+
+                  
+
