@@ -1,0 +1,224 @@
+<script src="~/lib/jquery/dist/jquery.js"></script>
+<!--<script src="http://ajax.aspnetcdn.com/ajax/jQuery/jquery-2.2.0.min.js"></script>-->
+<script type="text/javascript" >
+    //Loading the Employee in the List and display when the document is loaded
+    $(document).ready(function () {
+        jQuery.support.cors = true;
+        $.ajax({
+            url: 'api/employees',
+            type: 'GET',
+            dataType: 'json',
+            success: function (data) {
+                WriteResponses(data);
+            },
+            error: function (x, y, z) {
+                alert(x + '\n' + y + '\n' + z);
+            }
+        });
+        //Displays in a Table
+        function WriteResponses(employees){
+            var strResult = "<table><th>Name</th><th>Student ID</th><th>Gender</th><th>Age</th>";
+            $.each(employees, function (index, employee) {
+                strResult += "<tr><td>" + employee.name + "</td><td> " + employee.id + "</td><td> " + employee.gender + " </td><td> " + employee.age + " </td></tr>";
+            });
+            strResult += "</table>";
+            $("#divResult").html(strResult);
+        }
+    });
+    function GetEmployeeById() {
+        jQuery.support.cors = true;
+        $.ajax({
+            url: 'http://localhost:8252/api/employees/' + $("#employeeId").val(), //document.getElementById('studentId').value,
+            type: 'GET',
+            dataType: 'json',
+            success: function (data) {
+                WriteResponse(data);
+            }, 
+            error: function (x, y, z) {
+                alert('The Employee not found in the List for the given ID');
+            }
+        });
+        function WriteResponse(employee) {
+            document.getElementById('id').innerHTML = "<h4>" + employee.id + "</h4>";
+            document.getElementById('name').innerHTML = "<h4>" + employee.name + "</h4>";
+            document.getElementById('gender').innerHTML = "<h4>" + employee.gender + "</h4>";
+            document.getElementById('age').innerHTML = "<h4>" + employee.age + "</h4>";
+        }
+    }
+    //Adds a Student to the List
+    function AddEmployee() {
+        var employee = {
+            name: $('#newEmployeeName').val(),
+            id: $('#newEmployeeId').val(),
+            gender: $('#newEmployeeGender').val(),
+            age: $('#newEmployeeAge').val()
+        };
+
+        $.ajax({
+            url: 'http://localhost:8252/api/employees/',
+            type: 'POST',
+            data: JSON.stringify(employee),
+            contentType: "application/json;charset=utf-8",
+            success: function (data) {
+                alert('Employee added Successfully');                
+                GetAllEmployees();
+            },
+            error: function () {
+                alert('Employee not Added');
+            }
+        });
+        $('#newEmployeeName', '#newEmployeeId', '#newEmployeeGender', '#newEmployeeAge').val("");
+    }
+
+    //Updates the student Details in the List
+    function PutEmployee() {
+        var employee = {
+            name: $('#newEmployeeName').val(),
+            id: $('#newEmployeeId').val(),
+            gender: $('#newEmployeeGender').val(),
+            age: $('#newEmployeeAge').val()
+        };
+
+        $.ajax({
+            url: 'http://localhost:8252/api/employees/' + $("#employeeId").val(),
+            type: 'PUT',
+            data: JSON.stringify(employee),
+            contentType: "application/json;charset=utf-8",
+            success: function (data) {
+                alert('Details Updated Successfully');               
+                GetAllEmployees();            },
+            error: function () {
+                alert('Unable to Update for the Given ID');
+            }
+        });
+        $('#newEmployeeName', '#newEmployeeId', '#newEmployeeGender', '#newEmployeeAge').val("");
+    }
+
+    function GetAllEmployees() {
+        jQuery.support.cors = true;
+        $.ajax({
+            url: 'http://localhost:8252/api/employees',
+            type: 'GET',
+            dataType: 'json',
+            success: function (data) {
+                WriteResponses(data);
+            },
+            error: function (x, y, z) {
+                alert(x + '\n' + y + '\n' + z);
+            }
+        });
+        //Displays in a Table
+        function WriteResponses(employees) {
+            var strResult = "<table><th>Name</th><th>Student ID</th><th>Gender</th><th>Age</th>";
+            $.each(employees, function (index, employee) {
+                strResult += "<tr><td>" + employee.name + "</td><td> " + employee.id + "</td><td> " + employee.gender + " </td><td> " + employee.age + " </td></tr>";
+            });
+            strResult += "</table>";
+            $("#divResult").html(strResult);
+        }
+    }
+    function DeleteEmployee() {
+        jQuery.support.cors = true;
+        $.ajax({
+            url: 'http://localhost:8252/api/employees/' + $("#txtdelete").val(), //document.getElementById('studentId').value,
+            type: 'DELETE',
+            dataType: 'json',
+            success: function (data) {
+                alert('Deteted Successfully');
+                GetAllEmployees();
+            },
+            error: function (x, y, z) {
+                alert('The Employee not found in the List for the given ID');
+            }
+        });
+        
+    }
+</script>
+
+<h4 style="color: #f00">List of Employees</h4>
+<div id="divResult" style="margin-left: 15px"></div>
+
+<div>
+    <h4 style="color: #f00">Get a Employee </h4>
+</div>
+<div style="margin-left: 15px">
+    <h4>Enter the Employee ID:</h4><input id="employeeId" type="text" />
+    <button id="GetEmployeeById" onclick="GetEmployeeById()">Get Employee</button>
+</div>
+<div style="margin-left: 5px">
+    <table>
+        <tr>
+            <td>
+                <h4>Name</h4>
+            </td>
+            <td><span id="name"></span></td>
+        </tr>
+        <tr>
+            <td>
+                <h4>ID</h4>
+            </td>
+            <td><span id="id"></span></td>
+        </tr>
+        <tr>
+            <td>
+                <h4>Gender</h4>
+            </td>
+            <td><span id="gender"></span></td>
+        </tr>
+        <tr>
+            <td>
+                <h4>Age</h4>
+            </td>
+            <td><span id="age"></span></td>
+        </tr>
+    </table>
+</div>
+<div>
+    <h4 style="color: #f00">Add or Update a Employee </h4>
+    <table style="margin-left: 5px">
+        <tr>
+            <td><span>Name</span></td>
+            <td>
+                <input id="newEmployeeName" type="text" />
+            </td>
+        </tr>
+        <tr>
+            <td><span>ID</span></td>
+            <td>
+                <input id="newEmployeeId" type="number" />
+            </td>
+        </tr>
+        <tr>
+            <td><span>Gender</span></td>
+            <td>
+                <select id="newEmployeeGender">
+                    <option value="Male">Male</option>
+                    <option value="Female">Female</option>
+                </select>
+            </td>
+        </tr>
+        <tr>
+            <td><span>Age</span></td>
+            <td>
+                <input id="newEmployeeAge" type="number" />
+            </td>
+        </tr>
+        <tr>
+            <td>
+                <button id="postEmployee" onclick="AddEmployee()">Add New Employee</button>
+            </td>
+            <td>
+                <button id="putEmployee" onclick="PutEmployee()">Update Employee</button>
+            </td>
+        </tr>
+    </table>
+</div>
+<div>
+    <table>
+    <tr>
+        <td><input id="txtdelete" type="text" /></td>
+        <td><input id="btndelete" type="button" value="Delete employee" onclick="DeleteEmployee()" /></td>
+        
+    </tr>
+    </table>
+</div>

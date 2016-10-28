@@ -1,0 +1,348 @@
+====>What is camel??
+Apache Camel is a very useful library that helps us process events or messages from many different sources. We may move these messages through many different protocols such as between VM, HTTP, FTP, JMS, or even DIRECTORY/FILE, and yet still keep our processing code free of transport logic. This allows us to concentrate on digesting the content of the messages instead.
+
+At the core of the Camel framework is a routing engine, or more precisely a routing-
+engine builder. It allows us to define our own routing rules, decide from which
+sources to accept messages, and determine how to process and send those messages to
+other destinations. Camel uses an integration language that allows us to define com-
+plex routing rules, akin to business processes.
+
+##Route:A Route is like a instruction definition to Camel on how to move our messages from one point to another.
+##@Handler annotation is used to indicate that a particular method should be used for Bean Binding.
+##ENDPOINTS:Apache Camel endpoints are the sources and sinks of messages in a route .
+##Message:Messages are the entities used by systems to communicate with each other when using messaging channels.
+          Messages flow in one direction from a sender to receiver.
+          Message have the following contents::
+          --->HEADERS::Headers are values associated with the message, such as sender
+                       identifiers, hints about content encoding, authentication infor-
+                       mation, and so on. Headers are name-value pairs; the name is a
+                       unique, case-insensitive string, and the value is of type java.
+                       lang.Object . This means that Camel imposes no constraints on
+                       the type of the headers. Headers are stored as a map within the
+                       message. 
+                       
+        --->ATTACHMENTS::A message can also have optional attachments, which
+                         are typically used for the web service and email components.
+        --->BODY(a payload)::The body is of type java.lang.Object . That means that a message can store any kind
+                  of content. It also means that it’s up to the application designer to make sure that the
+                  receiver can understand the content of the message. When the sender and receiver
+                  use different body formats, Camel provides a number of mechanisms to transform the
+                  data into an acceptable format, and in many cases the conversion happens automati-
+                  cally with type converters, behind the scenes.
+##File component:Syntax to define file component for a particular file name and set noop is equal to true
+                 <from uri="file:/home/noorshid/Desktop/source?fileName=students.xml&amp;noop=true"/>
+##Direct component: The direct component provides direct, synchronous invocation of any consumers when a producer sends a message exchange.
+                    This endpoint can be used to connect existing routes in the same camel context.
+
+
+
+
+
+
+
+##Exchange(Interface):An Exchange is the message container holding the information during the entire routing of a Message received 
+                      by a Consumer.
+                      Exchange is the standard form in which messages are propagated through routing rules .
+                      The main constitutes of an exchange are as follows:
+                      1)In Message:Is the current message encapsulated by the exchange.
+                                   The org.apache.camel.Message type provide s a
+                                   generic model of a message , with the following parts : 
+                                    i---->Body
+                                    ii--->headers
+                                    iii--->attachments
+                      2)Out message —is a temporary holding area for a reply message or for a transformed message .
+                     ===>The MEP(Message Exchange Pattern) defines the messaging style used such as one-way (InOnly) or request-reply (InOut),
+                     ===>The Exchange API provides two methods to get a message, either 'getIn' or 'getOut'.
+                      3)Message exchange pattern (MEP):affects the interaction between the
+                                                        exchange and endpoints in the route.
+                      4)Exchange ID —A unique ID that identifies the exchange. Camel will generate a default
+                                     unique ID , if we don’t explicitly set one.
+                      5)Exception—If an error occurs at any time during routing, an Exception will be
+                                  set in the exception field.
+                      6)Properties—Similar to message headers, but they last for the duration of the
+                                   entire exchange. Properties are used to contain global-level information,
+                                   whereas message headers are specific to a particular message. Camel itself will
+                                   add various properties to the exchange during routing. We, as a developer, can
+                                   store and retrieve properties at any point during the lifetime of an exchange.
+
+                   
+
+
+                    The Exchange API provides two methods to get a message, either 'getIn' or 'getOut'.
+                     Obviously the 'getIn' gets the IN message, and the 'getOut' gets the OUT message.
+                     Ex:To getIn header
+                         String num1=(String)exchange.getIn().getHeader("val1");
+                     Ex:TO setOut body
+                          String body = exchange.getIn().getBody(String.class);
+                          // change the message to say Hello
+                          exchange.getOut().setBody("Hello " + body);
+
+  ***====>To call the bean in camel.context.xml:::
+           <bean id="abc"class="xyz.cde.fgh">  ---->Defining the bean in xml
+          
+            calling bean in route as follows::
+           <to uri="bean:abc?method=getHeaderAndConst(${in.header.headerVal})"/>
+         
+
+##PROCESSORS:To enable thconvertere router to do some thing more interesting than simply connecting a
+             consumer endpoint to a producer endpoint, we can add processors to our route .
+                                   (Or)
+             A processor is a node in a route that can access and modify the stream of
+             exchanges passing through the route.
+            
+             **To set the body in java class:
+               exchange.getOut().setBody("Hello i am set as body through getOut");
+             **To set the body&Header in XML:
+                 <setHeader headerName="headerVal">  --->'headerName act as key'
+                   <simple>Noorshid</simple>
+                 </setHeader>
+   
+                <setBody>
+ 	          <simple trim="false">You get some trailing whitespace characters</simple>
+	        </setBody>
+              **To recieve the header value in java code:
+                 String myHeaderVal1=(String) exchange.getIn().getHeader("headerVal");
+               
+              **To display header in xml 
+                 <log message="${in.header.headerName}"/>
+              **To display header in xml
+                 <log message="${in.body}"/>
+---------------------------------------------------------------------------------------------------------------------------------------------------
+                                               Camel-Restlet
+                                           ====================
+===>The Restlet component provides Restlet based endpoints for consuming and producing RESTful resources.
+    **need to add camel-restlet maven dependency(Same version as camel core)
+===>URI format
+    restlet:restletUrl[?options]  =--->Options may be:headerFilterStrategy=#refName,restletMethod(GET,None),connectionTimeout,socketTimeout
+    **Format of restletUrl:
+                          protocol://hostname[:port][/resourcePattern]
+===>Message Body:
+      Camel will store the restlet response from the external server on the OUT body. 
+      All headers from the IN message will be copied to the OUT message, so that headers
+      are preserved during routing.
+===>There are many ways to expose an HTTP endpoint in Camel: jetty, tomcat, servlet, cxfrs and restlet.
+   --->Two of these components - cxfrs and restlet also support REST semantics just with few lines of code.
+**===>To get the value in the console of camel,
+      We can directly post the value from RESTClient and can 
+      catch it into  log as <log message="Logger Message:: ${body}">
+**===>To set the header from url we can make uri as follows:
+        <from uri="restlet:http://localhost:8431/myTestRoute/{username}?restletMethod=POST"/>
+        and we can get it in java code as follows:
+        String myHeader=(String) exchange.getIn().getHeader("username");
+        Also in the same way we can catch it into the camel xml dsl as follows:
+        <log message="HeaderValue: ${in.header.username}"/>
+        ***To print all headers
+            log.debug("all headers in exchages : "+exchange.getIn().getHeaders());
+===>We can append query options to the URI in the following format, ?option=value&option=value&...
+===>Http protocol headers:
+     Exchange.CONTENT_ENCODING
+     Exchange.CONTENT_TYPE
+     Exchange.HTTP_BASE_URI
+     Exchange.HTTP_CHARACTER_ENCODING
+     Exchange.HTTP_METHOD
+     Exchange.HTTP_PATH
+     Exchange.HTTP_QUERY
+     Exchange.HTTP_RESPONSE_CODE
+***VVI===>To change the response code in the status code(In RestClient Body) for any kind of exception:
+          exchange.getOut().setHeader(Exchange.HTTP_RESPONSE_CODE, new Integer(400));
+      ===>To get whole stacktrace in the response body: 
+          exchange.getOut().setBody(e.getMessage()); 
+      ===>To get parameters from string url:
+          String params = exchange.getIn().getHeader(Exchange.HTTP_QUERY, String.class);
+
+***VVI::::
+            ===>Using, exchange.getIn().setHeader("key","headerValue")&
+                exchange.getIN().setBody("This is the body")
+                                                           =---->Will propagate within camel context only,
+                                                                 we can not see outside the world(RestClient).
+            ===>Using exchange.getOut().setHeader("key","headerValue")&
+                       exchange.getOut().setBody("This is the body") 
+                                                           =---->Will propagate outside camel context,
+                                                                 we cannot see in the camel console,
+                                                                 but we can see in the outer world(RestClient).  
+***Direct Component:component provides direct, synchronous invocation of any consumers when a producer sends a message exchange.
+                    This endpoint can be used to connect existing routes in the same camel context.
+                   --->Sample using spring DSL:
+                    <route>
+                      <from uri="activemq:queue:order.in"/>
+                      <to uri="bean:orderService?method=validate"/>
+                      <to uri="direct:processOrder"/>
+                    </route>
+ 
+                   <route>
+                      <from uri="direct:processOrder"/>
+                      <to uri="bean:orderService?method=process"/>
+                      <to uri="activemq:queue:order.out"/>
+                   </route> 
+***Direct-vm Component:component provides direct, synchronous invocation of any consumers in the JVM when a producer sends a message 
+                       exchange.
+                   --->Sample using spring DSL:
+                       <route>
+                         <from uri="activemq:queue:order.in"/>
+                         <to uri="bean:orderService?method=validate"/>
+                         <to uri="direct-vm:processOrder"/>
+                       </route>
+ 
+                       <route>
+                         <from uri="direct-vm:processOrder"/>
+                         <to uri="bean:orderService?method=process"/>
+                         <to uri="activemq:queue:order.out"/>
+                      </route>       
+                  
+
+
+
+
+
+-------------------------------------------------------------------------------------------------------------------------------------------------
+                                     Camel Webservice CXF
+                                    =======================
+--->We can think of a web service as an API on the network.
+    The API itself is defined using the Web Services Description Language ( WSDL ), 
+    specifying what operations we can call on a web service and what the input and 
+    output types are, among other things.
+--->Messages are typically XML , formatted to comply with the Simple Object
+    Access Protocol ( SOAP ) schema. In addition, these messages are typically 
+    sent over HTTP .
+===>For accessing and publishing web services, Camel uses Apache CXF (http://cxf.apache.org).
+    **need to add camel-cxf maven dependency(Same version as Camel Core)
+===>We can develop two types of webservices with CXF:
+    (i)Contract-first development:Con-tract-first development means that we start out by writing a WSDL file (either
+                                  by hand or with the help of tooling), and then generating stub Java class implementations 
+                                  from the WSDL file by using a tool like CXF.
+    (ii)Code-first development:The other way to develop web services is by starting out with a Java class and then
+                               letting the web service framework handle the job of generating a WSDL contract for us.
+===>There are two main ways to configure a CXF component URI:
+    1.By configuring it within the URI 
+    2.By referencing a bean containing the configuration.
+ 
+      
+        ##1.CONFIGURING USING URI OPTIONS
+           When configuring CXF using only URI options, a CXF endpoint URI looks like this,cxf://anAddress[?options]
+  
+          Options are may be as follows:
+           1.wsdlURL --->Specifies the location of the WSDL contract file
+           2.serviceClass --->Specifies the name of the service endpoint interface (SEI). Typically
+                              this interface will have JAX-WS annotations. The SEI is required if
+                              the CXF data format mode is POJO.
+           3.serviceName ---->Specifies the service to use.
+                              (Obtained from the WSDL)
+           4.portName ----->Specifies the port to use.
+                              (Obtained from the WSDL)
+           5.dataFormat ----->Sets the data format type that CXF uses for its messages. The possible values are POJO , PAYLOAD ,
+                              and MESSAGE .
+
+       ##2.CONFIGURING USING A CXF ENDPOINT BEAN
+           When using a CXF endpoint bean in Spring, we have much more power than by configuring CXF via URI options. 
+           In the CXF endpoint bean, we can configure things like CXF interceptors, JAX-WS handlers, and the CXF bus. 
+           The URI for configuring the CXF component looks like this:
+              cxf:bean:beanName
+===>There are five main elements specified in the WSDL file:
+     1.types —Data types used by the web service
+     2.message  —Messages used by the web service
+     3.portType —Interface name and operation performed by the web service
+     4.binding  —Transport type and message encoding used by the web service
+     5.service  —Web service definition, which specifies the binding to use as well as
+                 the network address to use.
+
+===>URI format:
+              cxf:bean:cxfEndpoint[?options]
+    ####Options:
+                1.wsdlURL---->The location of the WSDL. It is obtained from endpoint address by default. 
+                2.serviceClass---->The name of the SEI (Service Endpoint Interface) class. This class can have, but does not required.
+                                   This option is only required by POJO mode.
+                                   If the wsdlURL option is provided, serviceClass is not required for PAYLOAD and MESSAGE mode. 
+                3.serviceName----->The service name this service is implementing, it maps to the wsdl:service@name.
+                4.endpointName---->The port name this service is implementing, it maps to the wsdl:port@name. 
+                5.dataFormat  ---->The data type messages supported by the CXF endpoint. 
+                                   Default: POJO
+                                   Example: POJO, PAYLOAD, MESSAGE
+                 And many more..................
+
+------------------------------------------------------------------------------------------------------------------------------------------------
+           
+                                           Camel XPATH
+                                        ================
+===>XPath is a query language that is used for traversing through an XML document. 
+    It is used commonly to search particular elements or attributes with matching patterns.
+    **Basically used navigate XML document.
+    **XPath is core component of XSLT standard.
+===>When processing XML messages , the XPath language enables us to select part of
+    a message ,by specifying an XPath expression that acts on the message's
+    Document Object Model (DOM).
+===>XPath specification specifies seven types of nodes which can be
+    the output of execution of the XPath expression:
+    1.Root
+    2.Element
+    3.Text
+    4.Attribute
+    5.Comment
+    6.Processing Instruction
+    7.Namespace
+
+===>To evaluate an XPath expression in the XML DSL, put the XPath expression inside
+an xpath element. The XPath expression is applied to the body of the current In
+message and returns an XML node (or nodeset). Typically, the returned XML node
+is automatically converted to a string.
+Ex:To extract the contents of the /person/name element from the current In message body
+   and use it to set a header named user
+   <beans ...>
+      <camelContext xmlns="http://camel.apache.org/schema/spring">
+         <route>
+           <from uri="file:rootPath"/>
+           <setHeader headerName="user">
+           <xpath>/person/name/text()</xpath>
+           </setHeader>
+           <log message="PROCESS COMPLETED"/>
+         </route>
+     </camelContext>
+   </beans>
+
+ VVI***---->If we want to get particular item
+      <xpath>//profession/name= 'Doctor'</xpath>
+
+               ----->If we want to convert the result to a specific type , specify the result type by
+                     setting the resultType attribute to a Java type name.
+                     <xpath resultType="String">/person/name/text()</xpath>
+===>Namespaces:When processing documents whose elements be long to one or more XML
+               schemas , it is typically necessary to associate name space URIs with prefixes ,so
+               that you can ide ntify e le me nt name s unambiguous ly in your XPath expressions.It
+              is possible to us e the s tandard XML me chanis m for as s ociating pre fixe s with
+              name space URIs .That is , we can set an attribute like this :
+              xmlns:Prefix="NamespaceURI".
+
+-------------------------------------------------------------------------------------------------------------------------------------------------
+                                    
+                                        Camel XSLT
+                                     ================
+===>EXtensible Stylesheet Language Transformation commonly known as XSLT is a way to transform the XML document into other formats
+    such as XHTML.
+===>Before learning XSLT, we must have knowledge of XLS(EXtensible Stylesheet Langauge)
+    **It is similar to XML as CSS is to HTML
+    ---->In case of XML document, tags are not predefined. In order to understand and style an XML document, World Wide Web Consortium (W3C) 
+         developed XSL which can act as XML based Stylesheet Language.
+===>An XSLT stylesheet is used to define the transformation rules to be applied on the target XML document.
+    XSLT stylesheet is written in XML format. XSLT Processor takes the XSLT stylesheet and apply the transformation 
+    rules on the target XML document and then it generates a formatted document in form of XML, HTML or text format.
+    This formatted document then is utilized by XSLT formatter to generate the actual output which is to be displayed
+    to the end user.
+
+===>For doing xslt in camel we can go through the xslt component of camel.
+    **--->From Camel 2.9 onwards the XSLT component is provided directly in the camel-core.
+    Syntax:
+            <to uri="xslt:/xsl/students.xsl"/>
+
+                                   
+ 
+
+
+
+
+
+               
+                                
+
+
+
+
+

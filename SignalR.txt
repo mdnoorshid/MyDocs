@@ -1,0 +1,78 @@
+#What is SignalR?
+--->ASP.NET SignalR is a library for ASP.NET developers that simplifies the process of      adding real-time web functionality to applications. Real-time web functionality is       the ability to have server code push content to connected clients instantly as it        becomes available, rather than having the server wait for a client to request new        data.
+
+SignalR can be used to add any sort of "real-time" web functionality to our ASP.NET application. While chat is often used as an example, we can do a whole lot more. Any time a user refreshes a web page to see new data, or the page implements long polling to retrieve new data, it is a candidate for using SignalR. Examples include dashboards and monitoring applications, collaborative applications (such as simultaneous editing of documents), job progress updates, and real-time forms.
+
+SignalR provides a simple API for creating server-to-client remote procedure calls (RPC) that call JavaScript functions in client browsers (and other client platforms) from server-side .NET code. SignalR also includes API for connection management (for instance, connect and disconnect events), and grouping connections.
+
+SignalR handles connection management automatically, and lets us broadcast messages to all connected clients simultaneously, like a chat room. We can also send messages to specific clients. The connection between the client and server is persistent, unlike a classic HTTP connection, which is re-established for each communication.
+
+SignalR supports "server push" functionality, in which server code can call out to client code in the browser using Remote Procedure Calls (RPC), rather than the request-response model common on the web today.
+
+#What can ASP.NET SignalR do?
+ *Server pushes data to client in HTTP connection
+ *Server to client RPC in HTTP connection
+ *Easily scale out via SQL Server, Redis or Service Bus
+
+#What technologies does SiganlR use to transfer data?
+ *Using WebSockets if it is available
+ *Otherwise, using other technologies, e.g. long polling
+
+#What kind of data does SignalR support to transfer?
+ Non-compressed JSON text or plain text
+ If we want to transfer compressed JSON or BSON or our binary data, we have to encode   and decode the data (e.g. using Base64) or to implement IJsonSerializer by our own   logic on the server side and implement the same logic on the client side. Note that   TextReader and TextWriter are used inside SignalR. That means we have to convert our   data to text before transferring anyway.
+
+           Packages
+         ===========
+All SignalR development packages can be fetched through NuGet. Normally, we just need to fetch Microsoft.AspNet.SignalR (Package ID) which contains most of the components we need, including:
+
+Microsoft.AspNet.SignalR.Core: server side components used to build SignalR endpoints.
+Microsoft.AspNet.SignalR.Owin: OWIN host for SignalR.
+Microsoft.AspNet.SignalR.SystemWeb: used to host SignalR in ASP.NET (via OWIN ASP.NET host).
+Microsoft.AspNet.SignalR.Js: JavaScript client for SignalR.
+Dependencies are also included: jQuery, Newtonsoft.Json, Microsoft.Owin.Host.SystemWeb, Microsoft.Web.Infrastructure and OWIN.
+You could fetch other SignalR packages when you need:
+
+Microsoft.AspNet.SignalR.Client: .NET client for SignalR (includes WinRT, WP8 and Silverlight5).
+Microsoft.AspNet.SignalR.Redis: Redis messaging backplane for scaling out SignalR in web farm.
+Microsoft.AspNet.SignalR.ServiceBus: Windows Azure Service Bus messaging backplane for scaling out SignalR in web farm.
+Microsoft.AspNet.SignalR.SqlServer: SQL Server messaging backplane for scaling out SignalR in web farm.
+Microsoft.AspNet.SignalR.Sample: used to quickly setup a working sample in your application.
+
+===>The SignalR API contains two models for communicating between clients and servers:     'Persistent Connections' and 'Hubs'.
+
+   A Connection represents a simple endpoint for sending single-recipient, grouped, or    broadcast messages. The Persistent Connection API (represented in .NET code by the      PersistentConnection class) gives the developer direct access to the low-level    communication protocol that SignalR exposes. Using the Connections communication    model will be familiar to developers who have used connection-based APIs such as    Windows Communcation Foundation.
+
+    A Hub is a more high-level pipeline built upon the Connection API that allows our       client and server to call methods on each other directly. SignalR handles the            dispatching across machine boundaries as if by magic, allowing clients to call           methods on the server as easily as local methods, and vice versa. Using the Hubs         communication model will be familiar to developers who have used remote invocation       APIs such as .NET Remoting. Using a Hub also allows us to pass strongly typed           parameters to methods, enabling model binding.
+========================================================================================
+                          Steps to Do Project(Chat Application)
+                         ----------------------------------------
+1.First of all we have to create asp.web project.
+2.From package mangaer console run the command 'install-package     Microsoft.AspNet.SignalR' so that the related package and dependencies will be added  
+  into our project.
+3.Next step to create SignalR Hub Class (v2) may give relevant name such as ChatHub       class.
+4.After that create OWIN Startup Class and may name as startup class.
+5.Now need to make on html page
+
+
+
+using System;
+using System.Threading.Tasks;
+using Microsoft.Owin;
+using Owin;
+
+[assembly: OwinStartup(typeof(SignalR_MoveShape.Startup))]
+
+namespace SignalR_MoveShape
+{
+    public class Startup
+    {
+        public void Configuration(IAppBuilder app)
+        {
+            // Any connection or hub wire up and configuration should go here
+            app.MapSignalR();
+        }
+    }
+}
+
+

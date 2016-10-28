@@ -1,0 +1,49 @@
+                             Entity Framework 
+                            ===================
+==>Entity framework is an Object Relational Mapping (ORM) framework that offers an    automated mechanism to developers for storing and accessing the data in the database.
+==>Entity Framework was first released in 2008, Microsoft's primary means of interacting    between .NET applications and relational databases. 
+ 
+                              Code-First
+                            --------------
+--->Entity Framework introduced Code-First approach from Entity Framework 4.1. Code-         First is mainly useful in Domain Driven Design. With the Code-First approach, we can     focus on the domain design and start creating classes as per our domain requirement      rather than design our database first and then create the classes which match our        database design. Code-First APIs will create the database on the fly based on our        entity classes and configuration.
+
+****************************************************************************************
+                       Steps to do first-code
+                      ------------------------
+---->First we have to download Entity framework via NuGet
+     (First, create the console application. Right click on our project in the solution       explorer and select Manage NuGet Packages.)
+
+****************************************************************************************
+Scenarios of Entity framework:-
+--->Generate Data Accessing Classes for existing Database.(Database First)
+--->Create Database from Domain Classes.(Code First)
+--->Create Datbase and Classes from the DB Model Design(Model First)
+
+----------------------------------------------------------------------------------------===> Code-First will create tables for classes included as DbSet properties in Context      class.
+===>Code-First also includes any referenced types included in these classes, even if the     referenced types are defined in a different assembly.
+===>Code-First automatically creates a Primary Key in each table.
+  **The default convention for primary key is that Code-First would create a primary key     for a property if the property name is Id or <class name>Id (NOT case sensitive).
+===>It is importance to notice that if once we have run the main class we will get     exception as ' InvalidOperationException stating The model backing the 'BlogContext'     context has changed since the database was created. Consider using Code First               Migrations to update the database.'
+To resolve that one we have to follow these steps:
+===>The first step is to enable migrations for our context
+    1.Run the 'Enable-Migrations' command in Package Manager Console.
+      This command has added a Migrations folder to our project, this new folder       contains two files:
+
+**The Configuration class:-This class allows us to configure how Migrations behaves for   our context. For this walkthrough we will just use the default configuration.
+  Because there is just a single Code First context in our project, Enable-Migrations     has automatically filled in the context type this configuration applies to.
+**An InitialCreate migration:-This migration was generated because we already had Code   First create a database for us, before we enabled migrations. The code in this   scaffolded migration represents the objects that have already been created in the   database.
+---->Now Run Add-Migration <changes Made ex:Teacher>
+---->Finally Run Update-Database
+     Now we can run our main class,and we will get the appropriate change in our           database.
+
+
+
+VVI***---->To create our own naming database pass the desired name in base of context         class.
+
+---->We go for Code First when we have to create our entity from our model class where
+     there may be existing database,or have to create new database or may be use default
+     create database.
+---->We go for Model First approach when want to create our model class and context           class with respect to our newly created  entity.
+---->We go for schema first approach when we want to generate model class and context         class for our existing entity.
+
+

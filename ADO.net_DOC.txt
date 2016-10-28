@@ -1,0 +1,65 @@
+                                   ADO.net
+                                ============
+===>ADO.NET is an object-oriented set of libraries that allows us to interact with data      sources. Commonly, the data source is a database, but it could also be a text file,      an Excel spreadsheet, or an XML file. 
+===>ADO.NET provides a relatively common way to interact with data sources, but comes in     different sets of libraries for each way we can talk to a data source. These         libraries are called Data Providers and are usually named for the protocol or data       source type they allow you to interact with. 
+===> #The SqlConnection object lets us manage a connection to a data source. 
+     #SqlCommand objects allow us to talk to a data source and send commands to it.
+     #To have fast forward-only read access to data, use the SqlDataReader. 
+     #If we want to work with disconnected data, use a DataSet and implement reading and       writing to/from the data source with a SqlDataAdapter. 
+
+To make SqlConnection through Windows Authentication:
+    ===>SqlConnection con=new SqlConnection("data source=.; database=Sample;                                            integrated security=SSPI")
+        *.--->Means to connect to a local instance of Sql Server.
+        *SSPI--->It is used to connect sql server using windows authentication
+
+========================================================================================
+
+Steps to do programming using Ado.net
+--------------------------------------
+1.First of all we will use the namespace 'System.Data.SqlClient' if we are going through 
+  sql server.
+2.We will connect to the Database as follows:
+ 
+ **using(SqlConnection conn = new SqlConnection()) 
+   {
+    conn.ConnectionString = "Server=MD_NAWED_R\                            \SQLEXPRESS;Database=BizRuntime;Trusted_Connection=True";
+    conn.Open();
+   }
+3.Once connected to the database, we can execute the set of commands that we're having   and which would execute on the server (or the data provider) to execute the function     we're trying to do.
+  **SqlCommand command = new SqlCommand("SELECT * FROM TableName", conn);
+4.Next step is to reading the data
+  ** using (SqlDataReader reader=command.ExecuteReader())
+                {
+                    Console.WriteLine("        Id\tName");
+                    Console.WriteLine("        ======================");
+                    while (reader.Read())
+                    {
+                        Console.WriteLine("\t{0}\t{1}",
+                            reader[0],reader[1]);
+                    }
+                }
+**Note if we are using parametrized query means for example we are search for
+  the records where criteria matches.
+  For ex:
+        **// Create the command
+          SqlCommand command = new SqlCommand("SELECT * FROM TableName WHERE FirstColumn                                                = @0", conn);
+         // Add the parameters.
+            command.Parameters.Add(new SqlParameter("0", 1));
+
+Note:====>SqlCommand insertCommand = new SqlCommand("INSERT INTO TableName (FirstColumn,           SecondColumn, ThirdColumn, ForthColumn) VALUES (@0, @1, @2, @3)", conn);
+          Here @0,@1,@2,@3 denotes corresponding columns to add dynamic values.
+          Ex:
+                insertCommand.Parameters.Add(new SqlParameter("0", 10));
+                insertCommand.Parameters.Add(new SqlParameter("1", "Test Column"));
+                insertCommand.Parameters.Add(new SqlParameter("2", DateTime.Now));
+                insertCommand.Parameters.Add(new SqlParameter("3", false));
+**V.V.I:
+          The most commonly used methods of the SqlCommand Class:
+          #ExecuteReader:Use when T-SQL returns more than single value.
+          #ExecuteNonQuery:Use when we want to perform an Insert,Delete,Update                                      operation.
+          #ExecuteScalar:Use when the query retruns the single value.Ex-query returns                          the total number of rows in a table.
+
+  
+  
+
+                     

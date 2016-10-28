@@ -1,0 +1,9 @@
+What is Razor?
+Razor is a new and simple markup syntax for embedding server code into ASP.NET web pages, much like Classic ASP.
+
+*Razor has the power of traditional ASP.NET, but is easier to use and easier to learn.
+
+*Razor is a markup syntax for adding server-based code to web pages
+*Razor has the power of traditional ASP.NET markup, but is easier to learn, and easier  to use
+*Razor is a server side markup syntax much like ASP and PHP
+*Razor supports C# and Visual Basic programming languages

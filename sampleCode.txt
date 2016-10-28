@@ -1,0 +1,115 @@
+using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Threading.Tasks;
+using Microsoft.AspNetCore.Mvc;
+using System.Data;
+using System.Data.SqlClient;
+
+namespace Web1.Controllers
+{
+    [Route("api/[controller]")]
+    public class ValuesController : Controller
+    {
+        // GET api/values
+        [HttpGet]
+        public IEnumerable<string> Get()
+        {
+            return new string[] { "value1", "value2" };
+        }
+
+        // GET api/values/5
+        [HttpGet("{id}")]
+        public string Get(int id)
+        {
+            SqlConnection connection = new SqlConnection();
+            connection.ConnectionString = @"Data Source=WIN-6P7CMDONPHV\;Initial Catalog=bizruntime;User ID=sa;Password=bizruntime@123";
+
+            connection.Open();
+            int value = 0;
+            string qry = "select * from Storage where id ='"+ id +"'";
+            SqlCommand cmd = new SqlCommand(qry, connection);
+
+            SqlDataReader dr;
+            dr = cmd.ExecuteReader();
+
+            while (dr.Read())
+            {
+                value = Convert.ToInt32(dr[1]);
+                
+            }
+            connection.Close();
+            return "value :{0}"+value;
+
+        }//... end of method.
+
+       
+        // POST api/values/5
+        [HttpPost("{id}")]
+        public string Post(int id, [FromBody]int value)
+        {
+            SqlConnection connection = new SqlConnection();
+            connection.ConnectionString = @"Data Source=WIN-6P7CMDONPHV\;Initial Catalog=bizruntime;User ID=sa;Password=bizruntime@123";
+
+            connection.Open();
+            int i = 0;
+            string qry = "insert into Storage values('"+ id +"','"+ value +"')";
+            
+            SqlCommand cmd = new SqlCommand(qry, connection);
+            i = cmd.ExecuteNonQuery();
+            connection.Close();
+            if (i > 0)
+            {
+                return "Data inserted successfully...";
+            }
+            else
+            {
+                return "Data Not inserted. Some error is there...";
+            }
+            
+        }//... end of method.
+
+
+        // PUT api/values/5
+        [HttpPut("{id}")]
+        public string Put(int id, [FromBody]int value)
+        {
+            SqlConnection connection = new SqlConnection();
+            connection.ConnectionString = @"Data Source=WIN-6P7CMDONPHV\;Initial Catalog=bizruntime;User ID=sa;Password=bizruntime@123";
+
+            connection.Open();
+            int i = 0;
+            string qry = "update Storage set value ='"+ value +"' where id='"+ id +"'";
+
+            SqlCommand cmd = new SqlCommand(qry, connection);
+            i = cmd.ExecuteNonQuery();
+            connection.Close();
+
+            return "Value updated";
+
+        }//... end of method.
+
+
+        // DELETE api/values/5
+        [HttpDelete("{id}")]
+        public string Delete(int id)
+        {
+            SqlConnection connection = new SqlConnection();
+            connection.ConnectionString = @"Data Source=WIN-6P7CMDONPHV\;Initial Catalog=bizruntime;User ID=sa;Password=bizruntime@123";
+
+            connection.Open();
+            string qry = "delete from Storage where id ='" + id + "'";
+            SqlCommand cmd = new SqlCommand(qry, connection);
+
+            SqlDataReader dr;
+            dr = cmd.ExecuteReader();
+
+            connection.Close();
+            return "Data Deleted";
+
+        }//... end of method
+    }
+}
+
+
+Server=MD_NAWED_R\SQLEXPRESS;Database=Database;Trusted_Connection=True;MultipleActiveResultSets=true;Integrated Security=false;User ID=test;Password=noorshid;

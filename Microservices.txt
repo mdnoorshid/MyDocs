@@ -1,0 +1,42 @@
+                      
+1.What is Cluster?? 
+===>In a computer system, a cluster is a group of servers and other resources that act like a single system and enable high availability and, in some cases, load balancing and parallel processing.
+2.What is stateless service??
+A stateless service is a type of service that is currently the norm in cloud applications. It is considered stateless because the service itself does not contain data that needs to be stored reliably or made highly available. If an instance of a stateless service shuts down, all of its internal state is lost. In this type of service, state must be persisted to an external store, such as Azure Tables or a SQL database, for it to be made highly available and reliable.
+3.What is nodes in service fabric??
+===>Virtual Machine Scale Sets are an Azure Compute resource we can use to deploy and manage a collection of virtual machines as a set. Every node type that is defined in a Service Fabric cluster is setup as a separate VM Scale Set. Each node type can then be scaled up or down independently, have different sets of ports open, and can have different capacity metrics.
+
+Service febric application(Stateless)
+======================================
+1.Just create Service Fabric Application(Say HelloWorld)
+2.Then create a stateless service project say HelloWorldStateless.
+3.Solution will contain two projects:
+  *HelloWorld. This is the application project that contains our services. It also contains the application manifest that describes the application, as well as a number of PowerShell scripts that help us to deploy our application.
+ *HelloWorldStateless. This is the service project. It contains the stateless service implementation.
+===>An open-ended entry point method, called 'RunAsync', where we can begin executing any workloads, including long-running compute workloads.
+===>A communication entry point where we can plug in our communication stack of choice, such as ASP.NET Web API. This is where we can start receiving requests from users and other services.
+protected override IEnumerable<ServiceInstanceListener> CreateServiceInstanceListeners()
+{
+    ...
+}
+
+**In stateless service, the count is stored in a local variable. But because this is a stateless service, the value that's stored exists only for the current lifecycle of its service instance. When the service moves or restarts, the value is lost.
+
+4.What is stateful service??
+===>Service Fabric introduces a new kind of service that is stateful. A stateful service can maintain state reliably within the service itself, co-located with the code that's using it. State is made highly available by Service Fabric without the need to persist state to an external store
+
+========================================================================================
+5.What is Application??
+===>An application is a collection of constituent services that perform a certain function or functions. A service performs a complete and standalone function (it can start and run independently of other services) and is composed of code, configuration, and data. For each service, code consists of the executable binaries, configuration consists of service settings that can be loaded at run time, and data consists of arbitrary static data to be consumed by the service. Each component in this hierarchical application model can be versioned and upgraded independently.
+
+An application type is a categorization of an application and consists of a bundle of service types. A service type is a categorization of a service. The categorization can have different settings and configurations, but the core functionality remains the same. The instances of a service are the different service configuration variations of the same service type.
+
+===>Classes (or "types") of applications and services are described through XML files (application manifests and service manifests) that are the templates against which applications can be instantiated from the cluster's image store.
+===>Two different manifest files are used to describe applications and services: the 'service manifest' and 'application manifest'.
+
+===>The service manifest declaratively defines the service type and version. It specifies service metadata such as service type, health properties, load-balancing metrics, service binaries, and configuration files. Put another way, it describes the code, configuration, and data packages that compose a service package to support one or more service types.
+
+The application manifest declaratively describes the application type and version. It specifies service composition metadata such as stable names, partitioning scheme, instance count/replication factor, security/isolation policy, placement constraints, configuration overrides, and constituent service types. The load-balancing domains into which the application is placed are also described.
+
+========================================================================================**OWIN--->Open Web Interface for .Net
+

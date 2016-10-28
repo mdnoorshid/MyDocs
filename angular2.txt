@@ -1,0 +1,308 @@
+=======================================================================================
+
+                     How to define Angular2 in visual Studio
+                    ------------------------------------------
+Step1==>.Create HTML file named “index.html” under wwwroot folder.
+  **--->Replace with the following codes:
+
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8" />
+    <title>Angular 2 with ASP.NET Core</title>
+</head>
+<body>
+    <h1>Demo of Angular 2 using ASP.NET Core with Visual Studio 2015</h1>
+</body>
+</html>
+
+Step2==>For ASP.NET Core to serve static files, we need to add StaticFiles middleware in Configure method of StartUp.cs page. 
+  
+       **--->Add the following lines in the startup.cs
+        
+        public void Configure(IApplicationBuilder app)
+        {
+            app.UseDefaultFiles();
+            app.UseStaticFiles();
+        }
+
+Step3==>Adding NPM Configuration file for Angular 2 packages
+        **--->add new file “NPM Configuration File“; by default package.json is added to               ASP.NET Core project 
+              
+Replace with the following codes:-
+{
+  "version": "1.0.0",
+  "name": "ngcorecontacts",
+  "scripts": {
+    "postinstall": "typings install",
+    "typings": "typings"
+  },
+  "dependencies": {
+    "@angular/common": "2.0.0-rc.5",
+    "@angular/compiler": "2.0.0-rc.5",
+    "@angular/core": "2.0.0-rc.5",
+    "@angular/forms": "0.3.0",
+    "@angular/http": "2.0.0-rc.5",
+    "@angular/platform-browser": "2.0.0-rc.5",
+    "@angular/platform-browser-dynamic": "2.0.0-rc.5",
+    "@angular/router": "3.0.0-rc.1",
+    "@angular/router-deprecated": "2.0.0-rc.2",
+    "@angular/upgrade": "2.0.0-rc.5",
+    "systemjs": "0.19.27",
+    "core-js": "^2.4.0",
+    "reflect-metadata": "^0.1.3",
+    "rxjs": "5.0.0-beta.6",
+    "zone.js": "^0.6.12",
+    "angular2-in-memory-web-api": "0.0.15"
+  },
+  "devDependencies": {
+    "typescript": "^1.8.10",
+    "gulp": "^3.9.1",
+    "path": "^0.12.7",
+    "gulp-clean": "^0.3.2",
+    "gulp-concat": "^2.6.0",
+    "gulp-typescript": "^2.13.6",
+    "typings": "^1.3.1",
+    "gulp-tsc": "^1.2.0"
+  }
+}
+              
+
+}Step4==>Add TypeScript configuration file – must for Angular 2 in ASP.NET Core using             TypeScript
+**--->Create “scripts” folder by right click “Project” and add “tsconfig.json” under “scripts“, copy paste below configuration. This folder acts TypeScript Virtual Project
+**--->Replace with the following codes
+      {
+  "compilerOptions": {
+    "emitDecoratorMetadata": true,
+    "experimentalDecorators": true,
+    "module": "commonjs",
+    "noEmitOnError": true,
+    "noImplicitAny": false,
+    "outDir": "../wwwroot/appScripts/",
+    "removeComments": false,
+    "sourceMap": true,
+    "target": "es5",
+    "moduleResolution": "node"
+  },
+  "exclude": [
+    "node_modules",
+    "typings/index",
+    "typings/index.d.ts"
+  ]
+}
+
+
+Step5==>From Node Modules to wwwroot of ASP.NET Core using GULP
+**--->Right Click on Project, add new “Gulp Configuration File” naming it “gulpfile.js” and copy below code into it.
+
+var ts = require('gulp-typescript');
+var gulp = require('gulp');
+var clean = require('gulp-clean');
+
+var destPath = './wwwroot/libs/';
+
+// Delete the dist directory
+gulp.task('clean', function () {
+    return gulp.src(destPath)
+        .pipe(clean());
+});
+
+gulp.task("scriptsNStyles", () => {
+    gulp.src([
+            'core-js/client/**',            
+            'systemjs/dist/system.src.js',
+            'reflect-metadata/**',
+            'rxjs/**',
+            'zone.js/dist/**',
+            '@angular/**',
+            'jquery/dist/jquery.*js',
+            'bootstrap/dist/js/bootstrap.*js',
+    ], {
+        cwd: "node_modules/**"
+    })
+        .pipe(gulp.dest("./wwwroot/libs"));    
+});
+
+var tsProject = ts.createProject('scripts/tsconfig.json');
+gulp.task('ts', function (done) {
+    //var tsResult = tsProject.src()
+    var tsResult = gulp.src([
+            "scripts/*.ts"
+    ])
+        .pipe(ts(tsProject), undefined, ts.reporter.fullReporter());
+    return tsResult.js.pipe(gulp.dest('./wwwroot/appScripts'));
+});
+
+gulp.task('watch', ['watch.ts']);
+
+gulp.task('watch.ts', ['ts'], function () {
+    return gulp.watch('scripts/*.ts', ['ts']);
+});
+
+gulp.task('default', ['scriptsNStyles', 'watch']);
+
+Step6==> Add TypeScript configuration file – must for Angular 2 in ASP.NET Core using          TypeScript
+
+Step7==>We need to create 'typings.json'
+        
+        {
+  "globalDependencies": {
+    "core-js": "registry:dt/core-js#0.0.0+20160602141332",
+    "jasmine": "registry:dt/jasmine#2.2.0+20160621224255",
+    "node": "registry:dt/node#6.0.0+20160621231320"
+  }
+}
+
+Step8==>Create scripts/app.module.ts with following content:
+
+import { NgModule }      from '@angular/core';
+import { BrowserModule } from '@angular/platform-browser';
+import { AppComponent }  from './app';
+
+@NgModule({
+    imports: [BrowserModule],
+    declarations: [AppComponent],
+    bootstrap: [AppComponent]
+})
+export class AppModule { }
+
+Step9==>Adding Angular 2 code using TypeScript and refer them in index.html
+**--->Create TypeScript file “app.ts” file under “scripts” folder and copy below code.
+import { Component } from '@angular/core';
+@Component({
+    selector: 'my-app',
+    templateUrl: 'views/app.html',
+})
+export class AppComponent { }
+
+Step10==>Create another TypeScript file “boot.ts” under same “scripts” folder, this acts bootstrapper which imports “AppComponent” created above and helps load Angular 2.
+
+///<reference path="./../typings/globals/core-js/index.d.ts"/>
+import { platformBrowserDynamic } from '@angular/platform-browser-dynamic';
+import { AppModule } from './app.module';
+platformBrowserDynamic().bootstrapModule(AppModule);
+
+Step11==>Its time to add code which makes Angular 2 to be used in web pages, loads boot.js file. Open index.html under wwwroot folder and copy the below code.
+
+<html>
+<head>
+    <title>Angular 2 QuickStart</title>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    
+    <!-- 1. Load libraries -->
+    <!-- Polyfill(s) for older browsers -->
+
+    <script src="libs/core-js/client/shim.min.js"></script>
+    <script src="libs/zone.js/dist/zone.js"></script>
+    <script src="libs/reflect-metadata/Reflect.js"></script>
+    <script src="libs/systemjs/dist/system.src.js"></script>
+
+    <!-- 2. Configure SystemJS -->
+    <script src="systemjs.config.js"></script>
+    <script>
+        System.import('appScripts/boot').catch(function (err)
+        {
+            console.error(err);
+        });
+    </script>
+</head>
+<!-- 3. Display the application -->
+<body>
+    <my-app>Loading...</my-app>
+</body>
+</html>
+
+Step12==>'systemjs.config.js' is new file that needs to be created for loading all scripts of Angular 2 and its dependent packages like RxJs along with hand written files. It should be in folder as index.html.
+**Copy the below codes
+/**
+ * System configuration for Angular 2 samples
+ * Adjust as necessary for your application needs.
+ */
+(function (global) {
+    // map tells the System loader where to look for things
+    var map = {
+        'app': 'appScripts', // 'dist',
+        '@angular': 'libs/@angular',
+        'angular2-in-memory-web-api': 'libs/angular2-in-memory-web-api',
+        'rxjs': 'libs/rxjs'
+    };
+    // packages tells the System loader how to load when no filename and/or no extension
+    var packages = {
+        'app': { main: 'main.js', defaultExtension: 'js' },
+        'rxjs': { defaultExtension: 'js' },
+        'angular2-in-memory-web-api': { main: 'index.js', defaultExtension: 'js' },
+    };
+    var ngPackageNames = [
+      'common',
+      'compiler',
+      'core',
+      'forms',
+      'http',
+      'platform-browser',
+      'platform-browser-dynamic',
+      'router',
+      'router-deprecated',
+      'upgrade',
+    ];
+    // Individual files (~300 requests):
+    function packIndex(pkgName) {
+        packages['@angular/' + pkgName] = { main: 'index.js', defaultExtension: 'js' };
+    }
+    // Bundled (~40 requests):
+    function packUmd(pkgName) {
+        packages['@angular/' + pkgName] = { main: '/bundles/' + pkgName + '.umd.js', defaultExtension: 'js' };
+    }
+    // Most environments should use UMD; some (Karma) need the individual index files
+    var setPackageConfig = System.packageWithIndex ? packIndex : packUmd;
+    // Add package entries for angular packages
+    ngPackageNames.forEach(setPackageConfig);
+    var config = {
+        map: map,
+        packages: packages
+    };
+    System.config(config);
+})(this);
+
+=========================================================================================================
+{
+  "name": "angular2-quickstart",
+  "version": "1.0.0",
+  "scripts": {
+    "start": "tsc && concurrently \"npm run tsc:w\" \"npm run lite\" ",
+    "lite": "lite-server",
+    "postinstall": "typings install",
+    "tsc": "tsc",
+    "tsc:w": "tsc -w",
+    "typings": "typings"
+  },
+  "license": "ISC",
+  "dependencies": {
+    "@angular/common": "2.0.0",
+    "@angular/compiler": "2.0.0",
+    "@angular/core": "2.0.0",
+    "@angular/forms": "2.0.0",
+    "@angular/http": "2.0.0",
+    "@angular/platform-browser": "2.0.0",
+    "@angular/platform-browser-dynamic": "2.0.0",
+    "@angular/router": "3.0.0",
+    "@angular/upgrade": "2.0.0",
+    "core-js": "^2.4.1",
+    "reflect-metadata": "^0.1.3",
+    "rxjs": "5.0.0-beta.12",
+    "systemjs": "0.19.27",
+    "zone.js": "^0.6.23",
+    "angular2-in-memory-web-api": "0.0.20",
+    "bootstrap": "^3.3.6"
+  },
+  "devDependencies": {
+    "concurrently": "^2.2.0",
+    "lite-server": "^2.2.2",
+    "typescript": "^2.0.2",
+    "typings": "^1.3.2"
+  }
+         
+
+
+
+
