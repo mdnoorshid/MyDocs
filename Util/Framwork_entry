@@ -1,0 +1,15 @@
+INSERT INTO featureMaster values (42,'routeactivitytesting','pipelineGroup',1083,'1.0','test description value',1,1,'wms2.0');
+
+INSERT INTO confignode (nodeId,nodeName,isRoot,hasChildren,parentNodeId,description,type,level,version,primaryFeatureId) VALUES(1514,'pipelineGroup',0,1,1083,'test description','feature_group',3,'1.0',0)
+
+INSERT INTO confignode (nodeId,nodeName,isRoot,hasChildren,parentNodeId,description,type,level,version,primaryFeatureId) VALUES(1526,'routeactivitytesting',0,1,1514,'this is routeactivitytesting feature','feature',4,'1.0',0);
+
+INSERT INTO confignode (nodeId,nodeName,isRoot,hasChildren,parentNodeId,description,type,level,version,primaryFeatureId) VALUES(1517,'bizruntime',0,1,1516,'bizruntime implementation','implementation',5,'1.0',0);
+
+INSERT INTO confignode (nodeId,nodeName,isRoot,hasChildren,parentNodeId,description,type,level,version,primaryFeatureId) VALUES(1518,'getusroi',0,1,1517,'getusroi vendor for testing','vendor',6,'1.0',0);
+
+
+Cassandra DB
+=============
+CREATE KEYSPACE noorshid
+WITH replication = {'class':'SimpleStrategy', 'replication_factor' : 3};
