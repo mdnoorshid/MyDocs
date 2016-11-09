@@ -116,7 +116,10 @@
 ===>##Fetching Part::(In case of InlineBuilder)
     1.First of all define peramstoreConfiguration in Permastore.xml.
     2.Then we have to pass the following bean in the implementation route:
-       <to uri="bean:meshConfigUtil?method=getPermastoreConfiguration("Name of the permastore")"/>
+       **<to uri="bean:meshConfigUtil?method=getPermastoreConfiguration("Name of the permastore")"/>
+       This will take "Name of the permastore" as map object with key being "Name of the permastore" and
+       object as its pre configured value in the permastore configuration into the perma data object
+       of mesh header.
     3.In java class(where we want use permastore data) we have to define the Object of MeshHeader.
       And we can get the MeshHeaderConstant using the MESH_HEADER_KEY.
       **MeshHeader meshHeader=(MeshHeader) exchange.getIn().getHeader(MeshHeaderConstant.MESH_HEADER_KEY);
@@ -213,6 +216,8 @@
                ========
    --->For CUSTOM EventBuilder(when we do for XML-XSLT) type we have to make our own class and then we have to pass the fqcn in the attribute 
        of the Event Builder.
+       Actually this is the builder class which will generate the required eventHeader and eventParam.Then we can get the event output
+       either in json or in xml-xslt type based on the requirement(This should be mention in the Event file).
        **How to build this class:
           1.First of all we have to extends our custom class to AbstractCamelEventBuilder.
           2.Then ovveride the method buildEvent() which has the parameters Exchange and Event and return type is 'ROIEvent' class.
@@ -237,6 +242,231 @@
 	     }
            ##For debugging purpose we have to keep in the mind for class when we are doing XML-XSLT EventTransformation type:
              'com.getusroi.eventframework.dispatcher.transformer.XmlTransformerHelper' which will be available in the roi-framwork.
+
+
+                              Integration Framework
+                           ===========================
+Steps::
+1.First of all change the path of 'StaticConfigProperties.properties' from the roi framework project.
+2.Now make the folders in the following hierarchy for the given path as follows:
+    StaticConfigFile
+          |
+          |
+         All  
+          |
+          |
+         All
+          |
+          |
+    <featureGroup>
+          |
+          |
+      <feature>
+          |
+          |
+    <Implementation>
+          |
+          |
+      <vendor>
+          |
+          |
+      <version>
+3.Write <activity>pipeline-config.xml in the resource.
+4.Wite <IntegrationPipeLineConfigurations> int the featuremetainfo.xml file. as follows:
+  <IntegrationPipeLineConfigurations>
+   <PipeConfiguration resourceName="email-xslt-pipeline-config.xml" />
+  </IntegrationPipeLineConfigurations>
+   <!-- <StaticFileConfiguration>
+	  <ConfigFile filePath="/home/bizruntime/Downloads/StaticConfigFile/all/all/libraryGroup/library/getusroi/1.0/"
+	    fileName="test.xsl">
+	  </ConfigFile>
+        </StaticFileConfiguration> -->
+ **StaticFileConfiguration is only neccessary for any static files such as xslt,ftl required in any activity.
+ **==>For staticFileConfiguration we must start zookeeper.
+ **==>For starting zookeeper::: sudo /bin/bash zkServer.sh start
+
+5.We must add <to uri="bean:getPipeConfigurationFromCache?method=loadPipeConfiguration(<pipeline name>)" /> route in 
+  the implementation route.
+
+6.                                         Steps
+                                          =======
+---->First of all make pipline config .xml file and configure it in the featureMetaInfo.xml file(follow the xsd for the sequnece)
+---->Now apply for the steps as mentioned in below for each separated pipelines.     
+7.                        Piplines Overview   
+                        =====================
+-----------------------------------------------------------------------------------------------------------------------------------------------
+                   xslt pipeline
+                       ---------------
+                 <PipeActivity>
+			<XSLTEnricherActivity name="SRXsltTransform">
+				<xsltpathMapper>
+					<xsltPathMap filePath="serviceRequestFormation.xsl" />
+					<xsltPathMap filePath="serviceRequestTransform.xsl" />
+				</xsltpathMapper>
+			</XSLTEnricherActivity>
+		</PipeActivity>
+===>Here we first put our xsl file in the 'StaticConfigFile' under version folder.
+===>Then whatever in the exchange it will convert the xml according to the xsl.Exchange can be set through bean class or directly from the 
+     resclient body or exchange set through the predecessor pipeline.
+                      
+------------------------------------------------------------------------------------------------------------------------------------------------
+                           ftl
+                         -------
+                <PipeActivity>
+			<FTLEnricherActivity name="testftlTransform1">
+				<ftlpathMapper>
+					<ftlPathMap filePath="ftlSubjectTemplate.ftl" />
+					<ftlMapto toXpath="EmailNotification/Subject" />
+				</ftlpathMapper>
+				<ftlDataMapper>
+					<ftlfieldMapper msgXpath="EmailNotification/Payload/Event/@ID"
+						ftlField="serviceID" />
+					<ftlfieldMapper msgXpath="EmailNotification/Payload/Event/SRNumber"
+						ftlField="SRNumber" />
+				</ftlDataMapper>
+			</FTLEnricherActivity>
+		</PipeActivity>
+===>Here also put .ftl file in the 'StaticConfigFile' under version folder.
+There are two important tags:
+1.<ftlpathMapper> where in child node we mention the file path and path of xml where the value should be gone.
+2.<ftlDataMapper>--->In child node we give the xpath where the value should be take.
+
+------------------------------------------------------------------------------------------------------------------------------------------------
+
+                       
+                              Email NOtification
+                            -----------------------
+             <PipeActivity>
+			<EmailNotifyActivity name="testemailnotification">
+			<!-- 	<MailServerConfig transport="smtp" mailHost="smtp.gmail.com"
+					smtpport="587" smtpsslenable="true" authenticate="true"
+					starttlsenable="true" authUser="joydeep.paul@bizruntime.com"
+					authPassword="dogababaA1!" /> -->
+				<EmailNotification recepientIdXpath="EmailNotification/Recipients/Recipient"
+					mailSubjectXpath="EmailNotification/Subject" mailBodyXpath="EmailNotification/Body">
+					 <!-- <MailAttachments>
+						<MailAttachment mailAttachmentXpath="EmailNotification/Attachments/Attachment"
+							mailAttachmentNameXpath="EmailNotification/Attachments/Attachment/@filename"
+							mailAttachmentFormatXpath="EmailNotification/Attachments/Attachment/@contentType" />
+					</MailAttachments> -->
+				</EmailNotification>
+			</EmailNotifyActivity>
+		</PipeActivity>
+--->First of all in the permastore we will store the authentication of the email as json object:-
+                                {
+				"authUser": "md.noorshid@bizruntime.com",
+				"transport": "smtp",
+				"mailHost": "smtp.gmail.com",
+				"smtpport": 587,
+				"smtpsslenable": true,
+				"authenticate": true,
+				"starttlsenable": true,
+				"authPassword": "9955924034"
+				}
+---->Now set xml in the exchange body which contains receipient's address,subject,body.
+     Exchange can be set in different ways as we mentioned above.      
+
+------------------------------------------------------------------------------------------------------------------------------------------------
+                     
+                           route activity
+                         -----------------
+             <PipeActivity>
+		<CamelRouteEndPoint>
+		  <CamelRoute isSameFeature="true">
+		    <ServiceName>updateSRForLocDescCustName</ServiceName>
+			<ExecutionRoute>direct:sac-updateSRForLocDescCustName-key2act-key2act-IR</ExecutionRoute>
+		  </CamelRoute>
+		  </CamelRouteEndPoint>
+             </PipeActivity>
+--->In route activity we can do in two ways:
+     1.We can call the route in between the process from the same feature.
+       In this we don't need to mention any attributes.
+     2.We can call the route in between the process from the different feature where we have to mention the 
+       attributes FeatureGroup,FeatureName,VendorName,Implementation within the featureContext.
+--->To set the exchange which required by the route from different feature we will call a route before calling the route(of different feature)
+    which will set the exchange which required by the calling route of the different feature.
+    *** We should keep in mind that the exchange will propagate throughout the pipeactivity.
+        Predecessor pipeactivity's exchange  will forwarded to it's successor.Once  any service is 
+        called where it loads the pipeactivity in its route then each pipeactivity will start executing from
+        the scratch. 
+
+-------------------------------------------------------------------------------------------------------------------------------------------------
+                           filter pipeactivity
+                          ---------------------
+              <PipeActivity>
+			<FilterPipelineActivity name="filterPipeLineEmail">
+				<conditions operator="AND">
+					<condition expression="EmailNotification/Payload/Event/SRNumber" value="122" />					
+				</conditions>
+				<conditionSuccess>
+					<fwk:send value="true" />
+				</conditionSuccess>
+				<conditionFaliure>
+					<fwk:drop value="true" />
+				</conditionFaliure>
+			</FilterPipelineActivity>
+		</PipeActivity>
+--->This pipeactivity is used to filtering.Any exchange which is in xml form will be filtered through the xpath value.
+    Conditions can be AND Or OR where in AND every conditions should be true and then the other pipeactivity will execute,
+    in case of failure it will drop the activities.
+
+--------------------------------------------------------------------------------------------------------------------------------------------------
+                             jdbcIntActivity
+                          --------------------
+                 <PipeActivity>
+			<JDBCIntActivity name="serviceRequestNoteInsert">
+				<DBConfig operation="INSERT" dbType="CASSANDRA"/>
+				<!-- the string is split based on ' '~single space, hence, it can give 
+					exceptions if /n is present, or if xml being formated -->
+				<SQL>INSERT INTO servicerequestnote (tenantid,site,sourcerequestid,datetime,newscheduledate,notexmlpayload) 
+                                     VALUES (tenantfld,sitefld,transNumfld,dateTimefld,newScheduleDateTimefld,attrDatefld);</SQL>
+				<dbmsMapper>
+					<fieldMapper xPath="WorkOrder/TenantId"
+						Field="tenantfld" />
+					<fieldMapper xPath="WorkOrder/SiteId"
+						Field="sitefld" />				
+					<fieldMapper xPath="WorkOrder/Provider/SourceId"
+						Field="transNumfld" />
+					<fieldMapper xPath="WorkOrder/Notes/Note/Subject"
+						Field="dateTimefld" />
+					<fieldMapper xPath="WorkOrder/ScheduledDate"
+						Field="newScheduleDateTimefld" />					
+					<fieldMapper xPath="WorkOrder/Notes/Note"
+						Field="attrDatefld" />						
+				</dbmsMapper>
+		      </JDBCIntActivity>
+		</PipeActivity>
+
+--->In jdbcIntActivity we have to define the operatuion and dbType.
+    Within the <SQL> tag we have to define the query and in the <dbmsMapper> 
+    will map the value to the defined field after fetching from xPath.
+
+-------------------------------------------------------------------------------------------------------------------------------------------------
+                              Eventing activity
+                            ---------------------
+                   <PipeActivity>
+			<EventPublishActivity EventName="ServiceRequest-ScheduledOnChanged">
+				<EventActivityParams>
+					<EventData xpathExpression="WorkOrder/TenantId" ExpressionValue="TenantId" />
+					<EventData xpathExpression="WorkOrder/SiteId" ExpressionValue="SiteId" />
+					<EventData xpathExpression="WorkOrder/Provider/Name" ExpressionValue="ProviderName" />
+					<EventData xpathExpression="WorkOrder/Provider/SourceId" ExpressionValue="SourceId" />
+					<EventData xpathExpression="WorkOrder/Provider/Id" ExpressionValue="ProviderNumber" />
+					<EventData xpathExpression="WorkOrder/ScheduledDate" ExpressionValue="ScheduledDate" />
+					<EventData xpathExpression="WorkOrder/CustomerWorkOrder" ExpressionValue="CustomerWorkOrder" />
+				</EventActivityParams>
+			</EventPublishActivity>
+		</PipeActivity>
+
+--->It is one of the important activity where we have to follow some steps:
+    --->First of all define one eventing file and configure it into the featureMetaInfo.xml file
+    --->While defining eventing we have not to provide any builder class, because this will be done by the pipeline activity.
+
+                          ####Thats all cool about pipeline's activity########
+     
+
+
+      
 
 
 
