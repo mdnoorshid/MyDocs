@@ -1,0 +1,682 @@
+                                      Chapter 1. Overview
+                                  ============================
+1.What is jBPM??
+--->jBPM is a flexible Business Process Management (BPM) Suite. 
+    It is light-weight, fully open-source (distributed under Apache license) and written in Java. 
+    It allows us to model, execute, and monitor business processes throughout their life cycle.
+--->A business process allows us to model our business goals by describing the steps that need 
+    to be executed to achieve those goals, and the order of those goals are depicted using a flow chart. 
+    This process greatly improves the visibility and agility of our business logic.
+---> Executable business processes bridge the gap between business users and developers
+     as they are higher-level and use domain-specific concepts that are understood by
+     business users but can also be executed directly.
+--->Business processes need to be supported throughout their entire life cycle:
+    authoring, deployment, process management and task lists, and dashboards and reporting.
+--->The core of jBPM is a light-weight, extensible workflow engine written in pure Java that allows us
+    to execute business processes using the latest BPMN 2.0 specification. It can run in any Java environment, 
+    embedded in your application or as a service.
+--->On top of the core engine, a lot of features and tools are offered to support business processes 
+    throughout their entire life cycle:
+    #Pluggable human task service based on WS-HumanTask for including tasks that need to be performed by human actors.
+    #Pluggable persistence and transactions (based on JPA / JTA).
+    #Web-based process designer to support the graphical creation and simulation of our business processes (drag and drop).
+    #Web-based data modeler and form modeler to support the creation of data models and process and task forms.
+    #Web-based, customizable dashboards and reporting.
+    #All combined in one web-based workbench, supporting the complete BPM life cycle:-
+     --->Modeling and deployment - author your processes, rules, data models, forms and other assets
+     --->Execution - execute processes, tasks, rules and events on the core runtime engine
+     --->Runtime Management - work on assigned task, manage process instances, etc
+     --->Reporting - keep track of the execution using Business Activity Monitoring capabilities
+     --->Eclipse-based developer tools to support the modeling, testing and debugging of processes
+     --->Remote API to process engine as a service (REST, JMS, Remote Java API)
+     --->Integration with Maven, Spring, OSGi, etc.
+
+--->BPM creates the bridge between business analysts, developers and end users by offering process management 
+     features and tools in a way that both business users and developers like.
+--->jBPM supports adaptive and dynamic processes that require flexibility to model complex, 
+     real-life situations that cannot easily be described using a rigid process. 
+--->jBPM is not just an isolated process engine. Complex business logic can be modeled as a combination
+    of business processes with business rules and complex event processing.
+
+                                         Overview
+                                       -----------
+1.The core engine is the heart of the project and allows us to execute business processes in a flexible manner.
+  It is a pure Java component that we can choose to embed as part of your application or deploy it as a service
+  and connect to it through the web-based UI or remote APIs. 
+  ---->An optional core service is the human task service that will take care of the human task life cycle if
+       human actors participate in the process.
+  ---->Another optional core service is runtime persistence; this will persist the state of all our
+       process instances and log audit information about everything that is happening at runtime.
+  ---->Applications can connect to the core engine by through its Java API or as a set of CDI services,
+       but also remotely through a REST and JMS API.
+2.Web-based tools allows you to model, simulate and deploy our processes and other related artifacts (like data models, forms, rules, etc.): 
+  ---->The process designer allows business users to design and simulate business processes in a web-based environment.
+  ---->The data modeler allows non-technical users to view, modify and create data models for use in our processes.
+  ---->A web-based form modeler also allows us to create, generate or edit forms related to your processes.
+  ---->Rule authoring allows us to specify different types of business rules (decision tables, guided rules, etc.)
+       for combination with our processes.
+  ---->All assets are stored and managed on the Guvnor repository (exposed through Git) and can be managed (versioning), built and deployed.
+3.The web-based management console allows business users to manage their runtime
+ (manage business processes like start new processes, inspect running instances, etc.), 
+  to manage their task list and to perform Business Activity Monitoring (BAM) and see reports.
+4.The Eclipse-based developer tools are an extension to the Eclipse IDE, targeted towards developers,
+  and allows us to create business processes using drag and drop, test and debug our processes, etc.
+
+                                        Core Engine
+                                       -------------
+1.The core jBPM engine is the heart of the project. It's a light-weight workflow engine that executes our business processes.
+  It can be embedded as part of our application or deployed as a service (possibly on the cloud).
+2.Main Features:-
+  --->Solid, stable core engine for executing our process instances.
+  --->Native support for the latest BPMN 2.0 specification for modeling and executing business processes.
+  ---->Strong focus on performance and scalability.
+  ---->Light-weight (can be deployed on almost any device that supports a simple Java Runtime Environment;
+       does not require any web container at all).
+3.(Optional) pluggable persistence with a default JPA implementation.
+4.Pluggable transaction support with a default JTA implementation.
+5.Implemented as a generic process engine, so it can be extended to support new node types or other process languages.
+6.Listeners to be notified of various events.
+7.Ability to migrate running process instances to a new version of their process definition.
+ 
+                                           Process Designer
+                                         -------------------
+1.The web-based designer allows us to model our business processes in a web-based environment.
+  It is targeted towards business users and offers a graphical editor for viewing and editing 
+  our business processes (using drag and drop), similar to the Eclipse plugin.
+       
+                                             Data Modeler
+                                           ---------------
+1.Processes almost always have some kind of data to work with. 
+  The data modeler allows non-technical users to view, edit or create these data models. 
+2.Typically, a business process analyst or data analyst will capture the requirements for a process or
+  application and turn these into a formal set of interrelated data structures.
+3.Typically, a business process analyst or data analyst will capture the requirements for a process
+  or application and turn these into a formal set of interrelated data structures.
+4.The new Data Modeler tool provides an easy, straightforward and visual aid for building both
+  logical and physical data models, without the need for advanced development skills or explicit coding. 
+
+                                             Form Modeler
+                                         -------------------
+1.The jBPM Form Modeler is a form engine and editor that enables users to create forms to
+  capture and display information during process or task execution, without needing any coding
+  or template markup skills.
+
+                                 Process Instance and Task Management
+                                --------------------------------------
+1.Business processes can be managed through a web-based management console. 
+  It is targeted towards business users and its main features are the following:-
+  --->Process instance management: the ability to start new process instances, get a
+      list of running process instances, visually inspect the state of a specific process instances.
+  --->Human task management: being able to get a list of all our current tasks
+    (either assigned to you or that you might be able to claim), and completing tasks on our 
+     task list (using customizable task forms).
+
+                                 Workbench
+                               ------------
+1.The workbench is the web-based application that combines all of the  web-based tools into one configurable solution.
+2.It supports the following: 
+  ---->A repository service to store your business processes and related artefacts, using a Git repository,
+       which supports versioning, remote accessing (as a file system), and using REST services.
+  ---->A web-based user interface to manage our business processes, targeted towards business users; 
+       it also supports the visualization (and editing) of our artifacts 
+      (the web-based editors like designer, data and form modeler are integrated here), 
+       but also categorisation, build and deployment, etc.
+  ---->Collaboration features to have multiple actors (for example business users and developers) work together on the same project.
+
+                               Eclipse Developer Tools
+                              -------------------------
+1.The Eclipse-based tools are a set of plugins to the Eclipse IDE and allow us to 
+  integrate our business processes in our development environment. 
+
+                               
+                               Chapter 2. Getting Started
+                             ==============================
+1.All releases can be downloaded from SourceForge. Select the version we want to download and then select which artifact we want:
+  URL:
+2.The jBPM code itself is using the Apache License v2.0.
+
+                               Chapter3.jBPM Installer(All about Installing)
+                              ==============================================
+1.Download 'jbpm-6.4.0-Final-installer-full-zip' from  http://www.jbpm.org/download/download.html.
+2.Unzip the 'jbpm-6.4.0-Final-installer-full-zip'.
+  We can 'jbpm-installer folder'.
+3.Inside this folder we will get lib folder in which it contains three war files including many zip folders.
+4.Inside lib folder we will get 'jboss-wildfly-8.2.1.Final.zip'.
+   Extract it......outside the lib folder.
+5.Now we will get 'wildfly-8.2.1.Final' folder.
+6.Go inside that folder and find 'bin' folder.
+7.We can now able to run jboss server using command prompt as 'sudo /bin/bash standalone.sh',it will start the server.
+8.Now we can access the server and open as localhost:8080 and then we can able to see WildFly homepage.
+9.Inside the bin folder only we will get 'add-user.sh' file.
+   Access it as 'sudo/bin/bash add-user.sh' from command prompt.
+10.Add the user.
+11.Now again run the jboss server and access url localhost:8080
+12.In the home page we will get 'Administration-console'.
+13.Click it and pass the required credentials.
+------------------------------------------------------------------
+14.Deploy jbpm-console.war file in deployment folder under standalone folder of wildfly-8.2.1Final.
+15.Now i have finally able to deploy jbpm-console.war in wildfy after getting a lot of issues on that.
+   Issues was based on starting of the wildfly server.
+   **Solution:We would start the application server using a command line like:-
+             **===>sudo /bin/bash standalone.sh -c standalone-full.xml
+                  ---->And then finally we will successfully able to view the workbench of JBPM6.4
+     **Note:We can find 'standalone-full.xml' under 'configuration' folder which is inside 'standalone' folder of 'wildfly' server.
+16.Now acess the url localhost:8080/jbpm-console
+17.Here we asked for security pass to get in the KIE workbench
+18.First we will get trouble in login.
+ **To resolve this issue copy and past two files naming as 'roles.properties' and 'users.properties' in configuration folder inside standalone folder of wildfly server.
+ **Next step,we have to edit the 'security level' which we can find  in  'standalone-full.xml'.
+   --->Inside   <security-domains> of <authentication> tag add these lines:-
+      ************************************************************************************************
+      *<login-module code="RealmUsersRoles" flag="required">                                         *
+      * <module-option name="usersProperties" value="${jboss.server.config.dir}/users.properties"/>  *
+      * <module-option name="rolesProperties" value="${jboss.server.config.dir}/roles.properties"/>  *
+      * <module-option name="realm" value="ApplicationRealm"/>                                       *
+      * <module-option name="password-stacking" value="useFirstPass"/>                               *    
+      * </login-module>                                                                              *
+      ************************************************************************************************
+      ------>Finally the problems will gone and we will able to login in workbench successfully.
+19.Now we have to download JBPM plugin in eclipse.
+20.Download plugin from the site 'http://download.jboss.org/drools/release/6.4.0.Final/'.
+   --->Download 'droolsjbpm-tools-distribution-6.4.0.Final.zip' and extract it in local disk of the system.
+   --->In eclipse,add new software--->Click Add Repository--->Click the Local button and then select select ".../binaries/
+                                                              org.drools.updatesite" (where we downloaded on our machine)
+          --->Select Drools and jBPM and then click the Next button--->Again Click Next and select “I accept the terms of license agreement” 
+                                                                       and then click Finish. The software installation starts.
+
+                                            Workbench
+                                          -------------
+1.open the process management as 
+   'http://localhost:8080/jbpm-console'
+2.The workbench supports the entire life cycle of our business processes: 
+  authoring, deployment, process management, tasks and dashboards. 
+3.To make a process available for execution, we need to successfully build and deploy it first.
+
+
+
+                 
+                                            Workbench Authentication
+                                           ----------------------------
+1.The workbench web application is using the "default" security domain for authenticating 
+  and authorizing users (as specified in the WEB-INF/jboss-web.xml inside the WARs).
+vvi--->**In this chapter we will get the guidance of changing the default database to myqsl.
+
++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+
+                                                   Chapter 4. Examples(Workbench)
+                                                 ========================
+1.To work in workbench please note down the following steps:
+
+   step1: The first step is to create an organizational unit
+          Click through the menu bars, and go to
+          **Authoring-->Administration-->Organizational Units-->Manage Organizational Units
+
+          Click Add to create an organizational unit, and give the name of the
+          organization unit and the user who is in charge of administering the projects
+          in the organization unit. 
+   
+   step2: Now, we can add a repository, navigate through the menus, and go to
+          **Authoring-->Administration-->Repositories-->New Repository
+
+          Now, provide a name for the repository, choose the organization unit,
+          and create the repository.
+
+   step3: Now, we can create a project for the organization unit.
+          Go to:
+           **Authoring-->Project Authoring-->Project Explorer
+             Now, choose our organization unit
+             (here, Bizruntime-jBPM) from the bread crumb of project categorization.
+
+   step4:Click 'New Item' and choose Project. Now, we can create a project by entering
+                a relevant project name.
+                
+                Give details like project name and a brief summary of the project, and
+                more importantly, gives the group ID, artifact ID, and version ID for the
+                project. Further, Finish the creation of new project.
+
+   step5: Therefore, we are ready to create our first business process model by using jBPM.
+           **Go to New Item-->Business Process
+
+   step6: Now, the workbench will show us the process modeler for modeling the
+          business process.Create the process modeling.
+
+   step7: We can attach the actor associated with the task by going to the Properties panel and
+          setting the actor.
+
+   step8:Next step is to Building and deploying the project.
+         **Go to Tools-->Project Editor-->and click Build & Deploy
+          
+         To see the deployment listed, go to Deploy-->Deployments to see Deployment Units.
+    
+   step9:Next step is to Running process
+         **Go to Process Management-->Process Definitions.
+           We can see the details of the process definitions deployed.
+
+   step10:Click 'New Instance' and start the process. This will start a process instance.
+    
+   step11:Go to Process Management-->Process Instances to view the process instance
+          details and perform life cycle actions on process instances.
+   step12:To view the tasks **Go to task-->Task List
+   
+
+
+
+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+     
+                                                 Chapter 5. Core Engine API
+                                             ====================================
+1.To 'interac' with the 'process engine' (for example, to start a process), we need to 'set up' a 'session'. 
+2.This session will be used to 'communicate' with the 'process engine'.
+3.A 'session needs' to have a reference to a 'knowledge base', which contains a reference to all the 
+  relevant process definitions.
+4.This knowledge base is used to look up the process definitions whenever necessary.
+5.To create a session, we first need to create a knowledge base, load all the necessary process definitions
+  (this can be from various sources, like from classpath, file system or process repository) and then instantiate a session.
+          Ex-Let we have to write an application to process sales orders(we could then define one or more process definitions
+                                                                         that define how the order should be processed.)
+
+         Steps:
+               1.We first need to create a 'knowledge base' that contains those 'process definitions'.
+               2.We can then create a 'session' based on this' knowledge base' so that, whenever a new sales order comes in, 
+                 a new process instance is started for that sales order.
+                 That process instance contains the state of the process for that specific sales request.
+                 A knowledge base can be shared across sessions and usually is only created once, at the start of the application
+               **'Sessions' can be created based on a 'knowledge base' and are used to execute 'processes' and interact with the engine.
+               ** We can create as many independent session as we need and creating a session is considered relatively lightweight. 
+       
+                                                     KieBase
+                                                 -------------
+1.The jBPM API allows us to first create a knowledge base.
+  This knowledge base should include all our process definitions that might 
+  need to be executed by that session. 
+2. To create a 'knowledge base', use a 'KieHelper' to load processes from various resources
+   (for example from the classpath or from the file system), and then create a new knowledge base from that helper.
+   ***************************************************************************************
+   *KieHelper kieHelper = new KieHelper();                                               *
+   *KieBase kieBase = kieHelper                                                          *
+   *                 .addResource(ResourceFactory.newClassPathResource("MyProcess.bpmn"))*
+   *                 .build();                                                           *
+   ***************************************************************************************
+
+                                                   KieSession
+                                                  ------------
+1.Once we have loaded our knowledge base, we should create a session to interact with the engine. 
+2.This 'session' can then be used to 'start new processes', 'signal events', etc.
+   ***********************************************************************************
+   * KieSession ksession = kbase.newKieSession();                                    *
+   * ProcessInstance processInstance = ksession.startProcess("com.sample.MyProcess");*
+   ***********************************************************************************
+                                                 ProcessRuntime
+                                               ------------------
+1.The 'ProcessRuntime' interface defines all the 'session methods' for 'interacting' with 'processes', as shown below.
+
+        /**
+	 * Start a new process instance.  The process (definition) that should
+	 * be used is referenced by the given process id.
+	 * 
+	 * @param processId  The id of the process that should be started
+	 * @return the ProcessInstance that represents the instance of the process that was started
+	 */
+           
+              ProcessInstance startProcess(String processId);
+
+       /**
+	 * Start a new process instance.  The process (definition) that should
+	 * be used is referenced by the given process id.  Parameters can be passed
+	 * to the process instance (as name-value pairs), and these will be set
+	 * as variables of the process instance. 
+              
+               ProcessInstance startProcess(String processId,
+                                 Map<String, Object> parameters);
+        /**
+     * Signals the engine that an event has occurred. The type parameter defines
+     * which type of event and the event parameter can contain additional information
+     * related to the event.  All process instances that are listening to this type
+     * of (external) event will be notified.  For performance reasons, this type of event
+     * signaling should only be used if one process instance should be able to notify
+     * other process instances. For internal event within one process instance, use the
+     * signalEvent method that also include the processInstanceId of the process instance
+     * in question. 
+
+               void signalEvent(String type,
+                     Object event);
+
+         /**
+     * Signals the process instance that an event has occurred. The type parameter defines
+     * which type of event and the event parameter can contain additional information
+     * related to the event.  All node instances inside the given process instance that
+     * are listening to this type of (internal) event will be notified.  Note that the event
+     * will only be processed inside the given process instance.  All other process instances
+     * waiting for this type of event will not be notified.
+               
+               void signalEvent(String type,
+                     Object event,
+                     long processInstanceId);
+
+         /**
+     * Returns a collection of currently active process instances.  Note that only process
+     * instances that are currently loaded and active inside the engine will be returned.
+     * When using persistence, it is likely not all running process instances will be loaded
+     * as their state will be stored persistently.  It is recommended not to use this
+     * method to collect information about the state of your process instances but to use
+     * a history log for that purpose. 
+
+                 Collection<ProcessInstance> getProcessInstances();
+
+        /**
+     * Returns the process instance with the given id.  Note that only active process instances
+     * will be returned.  If a process instance has been completed already, this method will return
+ 
+                  ProcessInstance getProcessInstance(long processInstanceId);
+
+        /**
+     * Aborts the process instance with the given id.  If the process instance has been completed
+     * (or aborted), or the process instance cannot be found, this method will throw an
+     * IllegalArgumentException.
+               
+                    void abortProcessInstance(long processInstanceId);
+
+        /**
+     * Returns the WorkItemManager related to this session.  This can be used to
+     * register new WorkItemHandlers or to complete (or abort) WorkItems.
+                  
+                    WorkItemManager getWorkItemManager();
+ 
+                                   Event Listeners
+                                  -----------------
+1.The session provides methods for registering and removing listeners. 
+2.A ProcessEventListener can be used to listen to process-related events, 
+  like starting or completing a process, entering and leaving a node, etc.
+              ******************************************************************
+              *  public interface ProcessEventListener {                       * 
+              *                                                                *
+              *  void beforeProcessStarted( ProcessStartedEvent event );       *
+              *  void afterProcessStarted( ProcessStartedEvent event );        *
+              *  void beforeProcessCompleted( ProcessCompletedEvent event );   *
+              *  void afterProcessCompleted( ProcessCompletedEvent event );    *
+              *  void beforeNodeTriggered( ProcessNodeTriggeredEvent event );  *
+              *  void afterNodeTriggered( ProcessNodeTriggeredEvent event );   *
+              *  void beforeNodeLeft( ProcessNodeLeftEvent event );            *        
+              *  void afterNodeLeft( ProcessNodeLeftEvent event );             *
+              *  void beforeVariableChanged(ProcessVariableChangedEvent event);*
+              *  void afterVariableChanged(ProcessVariableChangedEvent event); *
+              *                                                                *
+              *       }                                                        *
+              ******************************************************************        
+3.jBPM out-of-the-box provides a listener that can be used to create an audit log
+  (either to the console or the a file on the file system):
+  1.Console logger: This logger writes out all the events to the console.
+  2.File logger: This logger writes out all the events to a file using an XML representation.
+                 This log file might then be used in the IDE to generate a tree-based visualization 
+                 of the events that occurred during execution.
+  3.Threaded file logger: Because a file logger writes the events to disk only when closing the logger or 
+                          when the number of events in the logger reaches a predefined level, it cannot be used when 
+                          debugging processes at runtime. 
+  4.The KieServices lets you add a KieRuntimeLogger to our session, as shown below.
+    When creating a console logger, the knowledge session for which the logger needs to be created must be passed as an argument.
+    The file logger also requires the name of the log file to be created, and the threaded file logger requires the interval
+    (in milliseconds) after which the events should be saved. We should always close the logger at the end of our application.
+             ****************************************************************************************************
+             *import org.kie.api.KieServices;                                                                   *
+             *import org.kie.api.logger.KieRuntimeLogger;                                                       *
+             * ...                                                                                              *
+             * KieRuntimeLogger logger = KieServices.Factory.get().getLoggers().newFileLogger(ksession, "test");*
+             *// add invocations to the process engine here,                                                    *
+             *// e.g. ksession.startProcess(processId);                                                         *
+             * ...                                                                                              *
+             *logger.close();                                                                                   *
+             ****************************************************************************************************
+
+                                     Correlation Keys
+                                   --------------------
+1.A common requirement when working with processes is ability to assign a given process instance some sort 
+  of business identifier that can be later on referenced without knowing the actual (generated) id of the process instance.
+2.To provide such capabilities, jBPM allows to use CorrelationKey that is composed of CorrelationProperties.
+
+                                        Threads
+                                      -----------
+1.There are two types of multi threading:
+   **Logical:Logical multi-threading is what we see in a BPM process after the process reaches a parallel gateway
+             for example,from a functional standpoint, the original process will then split into two processes that are executed in a parallel 
+             fashion.             
+   **Technical: Technical multi-threading is what happens when multiple threads or processes are started on a computer,
+                for example by a Java or C program
+2.The jBPM engine supports logical multi-threading: for example, processes that include a parallel gateway.
+  We've chosen to implement logical multi-threading using one thread: a jBPM process that includes logical
+  multi-threading will only be executed in one technical thread.
+
+                                       RuntimeManager
+                                      ----------------
+1.RuntimeManager has been introduced to simplify and empower usage of knowledge API especially in context of processes. 
+2.It provides configurable strategies that control actual runtime execution (how KieSessions are provided) and by default provides following: 
+    **Singleton - runtime manager maintains single KieSession regardless of number of processes available
+    **Per Request - runtime manager delivers new KieSession for every request
+    **Per Process Instance -runtime manager maintains mapping between process instance and KieSession and always provides same KieSession 
+                             whenever working with given process instance 
+3.Runtime Manager is primary responsible for managing and delivering instances of RuntimeEngine to the caller. 
+  In turn, RuntimeEngine encapsulates two the most important elements of jBPM engine:
+  --->KieSession
+  --->TaskService
+
+4.Regular usage scenario for RuntimeManager is:
+  --->At application Startup
+  --->At request
+  --->At application shutdown     
+5.RuntimeManager has been introduced to simplify the configuration of KieBase
+( KnowledgeBase ) and KieSession ( KnowledgeSession ).    
+
+                                     #Runtime strategy
+                                    -------------------
+1.RuntimeManager implements a runtime strategy that lets us choose how to manage
+  our KieSession life cycle; let us see the available strategies:
+  **Singleton:The runtime manages only one shared RuntimeEngine instance (only one Kie session is active and shared)
+  **PerProcessInstance:The manager uses a dedicated Kie session for each process instance; the Kie session life cycle spans the process 
+                       instance duration
+  **PerRequest: Invoking the getRuntimeEngine() method returns a new RuntimeEngine instance
+                (creating a new Kie session and task serviceeach time).
+
+                                     Building RuntimeEnvironment
+                                    ------------------------------
+1.While RuntimeEnvironment interface provides mostly access to data kept as part of the environment 
+  and will be used by the RuntimeManager, users should take advantage of builder style class that provides
+  fluent API to configure RuntimeEnvironment with predefined settings.
+
+                                     Services
+                                    ----------
+1.On top of RuntimeManager API a set of high level services has been provided from jBPM version 6.2. 
+  These services are meant to be the easiest way to embed (j)BPM capabilities into custom application.
+2. A complete set of modules are delivered as part of these services. 
+   They are partitioned into several modules to ease thier adoptions in various environments.
+
+                                     Deployment Service
+                                   ----------------------
+1.As the name suggest, its primary responsibility is to deploy (and undeploy) units. 
+2.Deployment unit is kjar that brings in business assets (like processes, rules, forms, data model) for execution.
+3.Deployment services allow to query it to get hold of available deployment units and even their RuntimeManager instances.
+
+                                     Definition Service
+                                    --------------------
+1.Upon deployment, every process definition is scanned using definition service that parses the process
+  and extracts valuable information out of it. These information can provide valuable input to the system 
+  to inform users about what is expected.
+  Definition service provides information about:
+  --->process definition - id, name, description
+  --->process variables - name and type
+  --->reusable subprocesses used in the process (if any)
+  --->service tasks (domain specific activities)
+  --->user tasks including assignment information
+  --->task data input and output information
+
+                                     Process Service
+                                    -----------------
+1.Process service is the one that usually is of the most interest. Once the deployment and
+  definition service was already used to feed the system with something that can be executed. 
+2.Process service provides access to execution environment that allows:
+  --->start new process instance
+  --->work with existing one - signal, get details of it, get variables, etc
+  --->work with work items
+ 
+                                    Runtime Data Service
+                                   ----------------------
+1.Runtime data service as name suggests, deals with all that refers to runtime information:
+  --->started process instances
+  --->execute node instances
+
+   **Examples:
+     1.get all process definitions
+      --->Collection definitions = runtimeDataService.getProcesses(new QueryContext()); 
+     2.get active process instances
+      --->Collection<processinstancedesc> instances = runtimeDataService.getProcessInstances(new QueryContext());
+     3.get active nodes for given process instance
+      --->Collection<nodeinstancedesc> instances = runtimeDataService.getProcessInstanceHistoryActive(processInstanceId, new QueryContext());
+     4.get tasks assigned to john
+      --->List<tasksummary> taskSummaries = runtimeDataService.getTasksAssignedAsPotentialOwner("john", new QueryFilter(0, 10));
+
+                                   User Task Service
+                                  -------------------
+1.User task service covers complete life cycle of individual task so it can be managed from start to end.
+2.It explicitly eliminates queries from it to provide scoped execution and moves all query operations into runtime data service.
+3.Complete example with start process and complete user task done by services:
+     ************************************************************************************
+     *long processInstanceId =                                                          * 
+     *processService.startProcess(deployUnit.getIdentifier(), "org.jbpm.writedocument");*
+     *                                                                                  *
+     * List<Long> taskIds =                                                             *
+     *runtimeDataService.getTasksByProcessInstanceId(processInstanceId);                *
+     *                                                                                  *
+     *Long taskId = taskIds.get(0);                                                     *
+     *                                                                                  *
+     *userTaskService.start(taskId, "john");                                            *
+     *UserTaskInstanceDesc task = runtimeDataService.getTaskById(taskId);               *
+     *                                                                                  *
+     *Map<String, Object> results = new HashMap<String, Object>();                      *
+     *results.put("Result", "some document data");                                      *
+     *userTaskService.complete(taskId, "john", results);                                *
+     ************************************************************************************
+
+                                  QueryService
+                                 --------------
+1.QueryService provides advanced search capabilities that are based on Dashbuilder DataSets.
+  The concept behind it is that users are given control over how to retrieve data from underlying data store. 
+  This includes complex joins with external tables such as JPA entities tables, custom systems data base tables etc.
+
++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+
+                                     Chapter 6. Processes
+                                    =======================
+1.A specialized software system that helps in achieving designing, modeling, executing, monitoring,
+ and optimizing of business processes completely is called Business Process Management System (BPMS).
+2.The Business Process Model and Notation (BPMN) 2.0 specification is an OMG specification that not only defines a 
+  standard on how to graphically represent a business process (like BPMN 1.x), but now also includes execution semantics
+  for the elements defined, and an XML format on how to store (and share) process definitions.
+3.jBPM6 allows you to execute processes defined using the BPMN 2.0 XML format. That means that we can use all the different 
+  jBPM6 tooling to model, execute, manage and monitor your business processes using the BPMN 2.0 format for specifying our 
+  executable business processes.
+4.The BPMN 2.0 specification defines three main types of nodes:
+  **Events:They are used to model the occurrence of a particular event. This could be a start event
+           (that is used to indicate the start of the process), end events (that define the end of the process, or of that subflow)
+           and intermediate events (that indicate events that might occur during the execution of the process).
+  **Activities:These define the different actions that need to be performed during the execution of the process. 
+               Different types of tasks exist, depending on the type of activity we are trying to model (e.g. human task, service task, etc.) 
+               and activities could also be nested (using different types of sub-processes).
+  **Gateways:  Can be used to define multiple paths in the process. Depending on the type of gateway, these might indicate parallel execution, 
+               choice, etc.
+
+5.The following code fragment shows  how to load a BPMN2 process into  knowledge base ...
+    *************************************************************************
+    * private static KnowledgeBase createKnowledgeBase() throws Exception { *
+    *      KieHelper kieHelper = new KieHelper();                           *
+    *      KieBase kieBase = kieHelper                                      *
+    *     .addResource(ResourceFactory.newClassPathResource("sample.bpmn2"))*
+    *     .build();                                                         *
+    *                                                                       *
+    *     return kieBase;                                                   *
+    *   }                                                                   *
+    *************************************************************************
+
+
+
+                                     Details: Process properties
+                                   -------------------------------
+1.A BPMN2 process is a flow chart where different types of nodes are linked using connections.
+  The process itself exposes the following properties: 
+  --->Id: The unique id of the process
+  --->Name: The display name of the process
+  --->Version: The version number of the process
+  --->Package: The package (namespace) the process is defined in
+
+                    ***For Basic Application(Very Very Important)****
+                  -------------------------------------------------------
+1.Create new project as 'jbpm(maven)' project.
+2.In src/main/resource create 'BPMN2 Process'.
+3.**Dont't forget to edit the kmodule.xml file which is inside src/main/resource/META-INF.
+    ---->Define new 'kbase' with the required package.
+4.Create the required process flow using the editor in eclipse.
+5.Write the java class as follows:-
+   Step-1===>Create Knowledge Base:
+                
+                >>> KieServices kieServices = KieServices.Factory.get();
+                --->Kie Services, which is a hub giving access to the services provided by Kie.
+                
+                --->Once the kie service is created,create the KieContainer which is the
+                    container for the knowledge base.
+                >>> KieContainer kieContainer = kieServices.getKieClasspathContainer();
+
+                --->Finally create and return knowledge base
+                >>>  KieBase kieBase = kieContainer.getKieBase("kbase2");(Here kbase2 is defined in kmodule.xml file )
+
+   Step-2===>Create Runtime Manager
+               
+                >>> RuntimeManager runtimeManager = createRuntimeManager(kieBase);
+
+                --->Using the runtime manager, creates the
+		    runtime engine that is fully initialized and ready for operation:
+                >>> RuntimeEngine runtimeEngine = runtimeManager.getRuntimeEngine(null);
+
+   Step-3===>Start the process
+
+               ---->Using the runtime manager, create a knowledge session
+		    and start the process
+              
+                >>>KieSession kieSession = runtimeEngine.getKieSession();                 
+
+     
+               ---->If we have the process variables then we shoud start process as follows:
+
+                       Map<String, Object> params = new HashMap<String, Object>();
+                       params.put("userId", "krisv");
+                       params.put("description", "Need a new laptop computer");
+                       ksession.startProcess("com.sample.humantask", params);
+                      
+                         ---->Process will started.....
+   Step-4===>Complete the task
+                 
+              ---->Once the process is started,Start and complete the task as follows
+                      
+                      TaskService taskService = runtime.getTaskService();
+                      TaskSummary task2 = taskService.getTasksAssignedAsPotentialOwner("krisv", "en-UK").get(0);
+                      log.info("krisv executing task " + task2.getName() + "(" + task2.getId() + ": " + task2.getDescription() + ")");
+                   
+                       //start the task
+                       taskService.start(task2.getId(), "krisv");
+         
+                      results = new HashMap<String, Object>();
+                      results.put("outcome", "Agree");
+
+                      //Complete the task
+                      taskService.complete(task2.getId(), "krisv", results);
+
+
+
+
+                    
+
+  
+
+
+
+                                                                         
+                 
+
+
+
