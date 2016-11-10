@@ -1,0 +1,1389 @@
+                                     (Ch-1&Ch-2)Activity Setup
+                                     ==========================
+---->Download the activiti from the link http://activiti.org/download.html.
+---->Deploy the activiti-explorer.jar(copy from activiti folder) in WEB-APP of tomcat.
+---->Now We can access the UI of activiti as http://localhost:8080/activiti-explorer
+                                             Default person(for login in ui)
+                                            ----------------
+                                            1.kermit/kermit ---->admin
+                                            2.gonzo/gonzo   ---->manager
+                                            3.fozzie/fozzie ---->user
+ 
+---->The Activiti Explorer application uses an in-memory H2 database by default.
+                But we can change the default database to mysql db also.Follow the steps:
+                1.go to the webapps\activiti-explorer\WEB-INF\classes\db.properties under your tomcat installation 
+                2.change the connection paramters to use  mysql as:
+                             db=mysql
+                             jdbc.driver=com.mysql.jdbc.Driver
+                             jdbc.url=jdbc:mysql://localhost:3306/activiti
+                             jdbc.username=root
+                             jdbc.password=*****
+                3.Don't forget to copy  mysql connector in lib folder of activiti-explore(otherwise we will have problen in login).
+***************************************************************************************************************************************************
+                                            Ch-3:Configuration
+                                       =======================
+1.The Activiti process engine is configured through an XML file called 'activiti.cfg.xml'.
+   **Note that this is not applicable if we are using the Spring style of building a process engine.
+2.The easiest way to obtain a ProcessEngine, is to use the 'org.activiti.engine.ProcessEngines' class:
+               ++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+               +ProcessEngine processEngine = ProcessEngines.getDefaultProcessEngine()        + 
+               ++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+   **This will look for an 'activiti.cfg.xml' file on the classpath and construct an engine based on the configuration in that file. 
+3.The following sections will give a detailed overview of the configuration properties:-
+          +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+          +    <beans xmlns="http://www.springframework.org/schema/beans"                                                                     +
+          +    xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"                                                                          +
+          +   xsi:schemaLocation="http://www.springframework.org/schema/beans   http://www.springframework.org/schema/beans/spring-beans.xsd">+
+          +                                                                                                                                   +
+          +     <bean id="processEngineConfiguration" class="org.activiti.engine.impl.cfg.StandaloneProcessEngineConfiguration">              +
+          +                                                                                                                                    
+          +      <property name="jdbcUrl" value="jdbc:h2:mem:activiti;DB_CLOSE_DELAY=1000" />                                                 +
+          +      <property name="jdbcDriver" value="org.h2.Driver" />                                                                         +
+          +      <property name="jdbcUsername" value="sa" />                                                                                  +
+          +      <property name="jdbcPassword" value="" />                                                                                    +
+          +      <property name="databaseSchemaUpdate" value="true" />                                                                        +
+          +                                                                                                                                   +
+          +     <property name="jobExecutorActivate" value="false" />                                                                         +
+          +     <property name="asyncExecutorActivate" value="false" />                                                                       +
+          +     <property name="mailServerHost" value="mail.my-corp.com" />                                                                   +
+          +     <property name="mailServerPort" value="5025" />                                                                               +
+          +    </bean>                                                                                                                        +
+          +  </beans>                                                                                                                          
+          +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+4.**Note that the configuration XML is in fact a Spring configuration. This does not mean that Activiti can only be used in a Spring
+   environment.
+5.The ProcessEngineConfiguration object can also be created programmatically using the configuration file. It is also possible to use
+  a different bean id (e.g. see line 3):
+      1.ProcessEngineConfiguration.createProcessEngineConfigurationFromResourceDefault();      
+      2.ProcessEngineConfiguration.createProcessEngineConfigurationFromResource(String resource);
+      3.ProcessEngineConfiguration.createProcessEngineConfigurationFromResource(String resource, String beanName);
+      4.ProcessEngineConfiguration.createProcessEngineConfigurationFromInputStream(InputStream inputStream);
+      5.ProcessEngineConfiguration.createProcessEngineConfigurationFromInputStream(InputStream inputStream, String beanName);
+6.It is also possible not to use a configuration file, and create a configuration based on defaults:-
+      1.ProcessEngineConfiguration.createStandaloneProcessEngineConfiguration();
+      2.ProcessEngineConfiguration.createStandaloneInMemProcessEngineConfiguration();
+      **All these ProcessEngineConfiguration.createXXX() methods return a ProcessEngineConfiguration that can further be tweaked if needed.
+        After calling the buildProcessEngine() operation, a ProcessEngine is created:
+      +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+      +       ProcessEngine processEngine = ProcessEngineConfiguration.createStandaloneInMemProcessEngineConfiguration()          +
+      +          .setDatabaseSchemaUpdate(ProcessEngineConfiguration.DB_SCHEMA_UPDATE_FALSE)                                      +
+      +          .setJdbcUrl("jdbc:h2:mem:my-own-db;DB_CLOSE_DELAY=1000")                                                         +
+      +          .setAsyncExecutorEnabled(true)                                                                                   + 
+      +          .setAsyncExecutorActivate(false)                                                                                 +
+      +          .buildProcessEngine();                                                                                           +  
+      ++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+                           
+                                                 ProcessEngineConfiguration bean
+                                             -----------------------------------------
+1.The activiti.cfg.xml must contain a bean that has the id 'processEngineConfiguration'.
+    +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+    + <bean id="processEngineConfiguration"                                         +
+    + class="org.activiti.engine.impl.cfg.StandaloneProcessEngineConfiguration">    +
+    +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+2. The following classes are currently available:-
+   **org.activiti.engine.impl.cfg.StandaloneProcessEngineConfiguration:- the process engine is used in a standalone way.
+   **org.activiti.engine.impl.cfg.StandaloneInMemProcessEngineConfiguration:-this is a convenience class for unit testing purposes. 
+                                                                             Activiti will take care of the transactions. An H2 in-memory 
+                                                                             database is used by default. The database will be created and 
+                                                                             dropped when the engine boots and shuts down.
+  **org.activiti.spring.SpringProcessEngineConfiguration: To be used when the process engine is used in a Spring environment.
+  **org.activiti.engine.impl.cfg.JtaProcessEngineConfiguration:To be used when the engine runs in standalone mode, with JTA transactions.
+                                                 
+                                                    Database configuration
+                                               ---------------------------------
+
+1.There are two ways to configure the database that the Activiti engine will use:-                                              
+   (1)The first one is to define the JDBC properties of the database:-
+                    ++++++++++++++++++++++++++++++++++++++++++
+                    +   database=mysql                       +
+                    +   jdbc.driver=com.mysql.jdbc.Driver    + 
+                    +   jdbc:mysql://localhost:3306          +
+                    +   jdbc.username=root                   +  
+                    +   jdbc.password=********               +
+                    ++++++++++++++++++++++++++++++++++++++++++
+
+
+   (2)The second one , javax.sql.DataSource implementation can be used (e.g. DBCP from Apache Commons):-
+                    
+                    <bean id="dataSource" class="org.apache.commons.dbcp.BasicDataSource" >
+                         <property name="driverClassName" value="com.mysql.jdbc.Driver" />
+                         <property name="url" value="jdbc:mysql://localhost:3306/activiti" />
+                         <property name="username" value="activiti" />
+                         <property name="password" value="activiti" />
+                         <property name="defaultAutoCommit" value="false" />
+                     </bean>
+
+                    <bean id="processEngineConfiguration" class="org.activiti.engine.impl.cfg.StandaloneProcessEngineConfiguration">
+
+                        <property name="dataSource" ref="dataSource" />
+                       ...........
+                                                   JNDI Datasource Configuration                                                               
+                                              --------------------------------------
+1.By default, the database configuration for Activiti is contained within the db.properties files in the WEB-INF/classes of each web 
+  application. This isn’t always ideal because it requires users to either modify the db.properties in the Activiti source and recompile 
+  the war file, or explode the war and modify the db.properties on every deployment.
+  ****By using JNDI (Java Naming and Directory Interface) to obtain the database connection, the connection is fully managed by the Servlet 
+      Container and the configuration can be managed outside the war deployment. This also allows more control over the connection parameters 
+      than what is provided by the db.properties file.
+                                                   Creating the database tables
+                                                ------------------------------------
+1.We can create the database table for our database table is after Executing the main method of the DbSchemaCreate class.
+            ++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+            +         public class DbSchemaCreate                                                                                +
+            +        {                                                                                                           +
+            +            public static void main(String[] args) {                                                                +
+            +                  ProcessEngineConfiguration                                                                        +
+            +                    .createProcessEngineConfigurationFromResourceDefault()                                          +           
+            +                    .setDatabaseSchemaUpdate(ProcessEngineConfigurationImpl.DB_SCHEMA_UPDATE_CREATE)                +
+            +                    .buildProcessEngine();                                                                          +
+            +        }                                                                                                           +
+            +        }                                                                                                           +
+            ++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+                                                   Job Executor and Async Executor
+                                             -------------------------------------------
+1.Starting from version 5.17.0 Activiti provides an Async executor in addition to the Job Executor. The Async executor is a more performant  
+  and more database friendly way of executing asynchronous jobs in the Activiti Engine. It’s therefore recommended to switch to the Async 
+  executor. By default the old job executor is still used.  
+                                        
+2.The JobExecutor is a component that manages a couple of threads to fire timers (and later also asynchronous messages).
+               By default, the JobExecutor is activated when the process engine boots. Specify:-
+                       <property name="jobExecutorActivate" value="false" />
+4.The AsyncExecutor is a component that manages a thread pool to fire timers and other asynchronous tasks.
+              By default, the AsyncExecutor is not enabled and the JobExecutor is used due to legacy reasons. It’s however recommended to use 
+              the new AsyncExecutor instead. This can be done by defining two properties:-
+               <property name="asyncExecutorEnabled" value="true" />
+               <property name="asyncExecutorActivate" value="true" />
+                                                   Event handlers
+                                                --------------------
+1.An event mechanism has been introduced in Activiti 5.15. It allows us to get notified when various events occur within the engine. 
+  **Event listener implementation:-
+         public class MyEventListener implements ActivitiEventListener {
+
+                @Override
+                 public void onEvent(ActivitiEvent event) {
+                 switch (event.getType()) {
+
+                 case JOB_EXECUTION_SUCCESS:
+                 System.out.println("A job well done!");
+                 break;
+                 case JOB_EXECUTION_FAILURE:
+                 System.out.println("A job has failed...");
+                 break;
+
+                 default:
+                System.out.println("Event received: " + event.getType());
+                }
+               }
+
+             @Override
+              public boolean isFailOnException() {
+            // The logic in the onEvent method of this listener is not critical, exceptions
+            // can be ignored if logging fails...
+              return false;
+               }
+                 }
+  ** Configuration and setup:-
+                <bean id="processEngineConfiguration" class="org.activiti.engine.impl.cfg.StandaloneProcessEngineConfiguration">
+                       ...
+                 <property name="eventListeners">
+                   <list>
+                    <bean class="org.activiti.engine.example.MyEventListener" />
+                   </list>
+                </property>
+                </bean>
+2.Supported event types:-To get the suppported information of events type that occur in engine go to the below link:
+                          http://www.activiti.org/userguide/#eventDispatcherEventTypes.
+                        **Each type corresponds to an enum value in the 'org.activiti.engine.delegate.event.ActivitiEventType'**
+3. **Additional remarks:Only listeners are notified in the engine the events are dispatched from. So in case we have different engines - 
+   running against the same database - only events that originated in the engine the listener is registered for, are dispatched to that 
+   listener. The events that occur in the other engine are not dispatched to the listeners, regardless of the fact they are running in the 
+   same JVM or not.
+
++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+                                    
+                                                Ch-4: The Activiti API
+                                           ===================================
+1.The engine API is the most common way of interacting with Actdeployed processesiviti.
+2.The central starting point is the 'ProcessEngine', which can be created in several ways.
+3.From the ProcessEngine, we can obtain the various services that contain the workflow/BPM methods:-
+                    +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+                    +  ProcessEngine processEngine = ProcessEngines.getDefaultProcessEngine();      +
+                    +   RuntimeService runtimeService = processEngine.getRuntimeService();          +
+                    +  RepositoryService repositoryService = processEngine.getRepositoryService();  +
+                    +  TaskService taskService = processEngine.getTaskService();                    +
+                    +  ManagementService managementService = processEngine.getManagementService();  +
+                    +  IdentityService identityService = processEngine.getIdentityService();        +
+                    +  HistoryService historyService = processEngine.getHistoryService();           +
+                    +  FormService formService = processEngine.getFormService();                    +
+                    +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+4.ProcessEngines.getDefaultProcessEngine():-It will initialize and build a process engine the first time it is called and afterwards always 
+                                            return the same process engine. 
+              ** Proper creation and closing of all process engines can be done with 'ProcessEngines.init()' and 'ProcessEngines.destroy()'
+      **Note: **The ProcessEngines class will scan for all 'activiti.cfg.xml' and 'activiti-context.xml files'.   
+5.RepositoryService:-This service offers operations for managing and manipulating deployments and process definitions.
+         ** A deployment is the unit of packaging within the Activiti engine.
+6.RuntimeService:- It deals with starting new process instances of process definitions.
+         **process definition defines the structure and behaviour of the different steps in a process. 
+         **The RuntimeService also is the service which is used to retrieve and store process variables.
+         **The Runtimeservice also allows to query on process instances and executions.
+7.Tasks that need to be performed by actual human users of the system are core to a BPM engine such as Activiti. Everything around tasks is 
+  grouped in the 'TaskService', such as:-
+   *Querying tasks assigned to users or groups
+   *Creating new standalone tasks. These are tasks that are not related to a process instances.
+   *Manipulating to which user a task is assigned or which users are in some way involved with the task.
+   *Claiming and completing a task. Claiming means that someone decided to be the assignee for the task, 
+    meaning that this user will complete the task.
+
+            ====>Different kinds of TaskService are as follows:-
+            *IdentityService(Pretty Simple):- It allows the management (creation, update, deletion, querying, …​) of groups and users. 
+            *FormService(Optional):-Meaning that Activiti can perfectly be used without it, without sacrificing any functionality. This 
+                                    service introduces the concept of a start form and a task form. A start form is a form that is shown to  
+                                    the user before the process instance is started, while a task form is the form that is displayed when a  
+                                    user wants to complete a form.
+            *HistoryService:-It exposes all historical data gathered by the Activiti engine.When executing processes, a lot of data can be 
+                             kept by the engine (this is configurable) such as process instance start times, who did which tasks, how long it 
+                             took to complete the tasks, which path was followed in each process instance, etc. This service exposes mainly 
+                             query capabilities to access this data.
+            *ManagementService(typically not needed):-It allows to retrieve information about the database tables and table metadata.
+8.Exception strategy:-The base exception in Activiti is the org.activiti.engine.ActivitiException, an unchecked exception. This exception can 
+                      be thrown at all times by the API.
+                                              **====>Deploying the process
+                                          -------------------------------------
+1.To make this process known to the Activiti engine, we must deploy it first.
+2.Deploying means that the engine will parse the BPMN 2.0 xml to something executable and a new database record will be added for each process 
+  definition included in the deployment. This way, when the engine reboots, it will still know all of the deployed processes:
+                      ***********************************************************************************************************************  
+                      *  ProcessEngine processEngine = ProcessEngines.getDefaultProcessEngine();                                            *
+                      *  RepositoryService repositoryService = processEngine.getRepositoryService();                                        * 
+                      *  repositoryService.createDeployment().addClasspathResource("org/activiti/test/VacationRequest.bpmn20.xml").deploy();*
+                      *  Log.info("Number of process definitions: " + repositoryService.createProcessDefinitionQuery().count());            *
+                      ***********************************************************************************************************************
+                                         
+                                             **====>Starting a process Instance
+                                          ---------------------------------------
+1.After deploying the process definition to the Activiti engine, we can start new process instances from it.
+2.For each 'process definition', there are typically many 'process instances'.             
+2.The 'process definition' is the blueprint, while a 'process instance' is a 'runtime execution' of it.
+3.Everything related to the runtime state of processes can be found in the 'RuntimeService'.
+  There are various way to start a new process instance.
+4. In the following snippet, the key is used that defined in the process definition xml to start the process instance.Here also providing some
+   process variables at process instance start, because the description of the first user task will use these in its expressions. Process 
+   variables are commonly used because they give meaning to the process instances for a certain process definition. Typically, the process  
+   variables are what make process instances differ from one another:-
+                     *****************************************************************************************************************
+                     *   Map<String, Object> variables = new HashMap<String, Object>();                                              *
+                     *   variables.put("employeeName", "Kermit");                                                                    *
+                     *   variables.put("numberOfDays", new Integer(4));                                                              *
+                     *   variables.put("vacationMotivation", "I'm really tired!");                                                   *
+                     *                                                                                                               *
+                     *   RuntimeService runtimeService = processEngine.getRuntimeService();                                          *
+                     *   ProcessInstance processInstance = runtimeService.startProcessInstanceByKey("vacationRequest", variables);   *
+                     *                                                                                                               * 
+                     *   // Verify that there is started a new process instance                                                      *
+                     *   Log.info("Number of process instances: " + runtimeService.createProcessInstanceQuery().count());            * 
+                     *****************************************************************************************************************
+ 
+                                         **====> Completing tasks
+                                     ---------------------------------------
+1.When the process starts, the first step will be a user task. This is a step that must be performed by a user of the system.
+2.Typically, such a user will have an inbox of tasks which lists all the tasks that need to be done by this user.
+  Following code snippet shows how such a query might be performed:-
+           *************************************************************************************************   
+           *        // Fetch all tasks for the management group                                            *
+           *   TaskService taskService = processEngine.getTaskService();                                   *
+           *   List<Task> tasks = taskService.createTaskQuery().taskCandidateGroup("management").list();   *
+           *       for (Task task : tasks) {                                                               *
+           *                              Log.info("Task available: " + task.getName());                   *
+           *                               }                                                               *
+           *                                                                                               *
+           *      //To continue the process instance, we need to finish this task. For the Activiti engine,*
+           *     // this means we need to complete the task. Following snippet shows how this is done:    *
+           *                                                                                               *
+           *            Task task = tasks.get(0);                                                          *
+           *                                                                                               * 
+           *            Map<String, Object> taskVariables = new HashMap<String, Object>();                 *
+           *            taskVariables.put("vacationApproved", "false");                                    *
+           *            taskVariables.put("managerMotivation", "We have a tight deadline!");               *
+           *            taskService.complete(task.getId(), taskVariables);                                 *
+           ************************************************************************************************* 
+                                    
+                                 **====>Suspending and activating a process
+                                --------------------------------------------
+1.It’s possible to suspend a process definition.When a process definition is suspended, new process instance can’t be created (an exception  
+  will be thrown).
+2.Suspending the process definition is done through the 'RepositoryService':
+                          **************************************************************************         
+                          *    repositoryService.suspendProcessDefinitionByKey("vacationRequest"); *
+                          *    try {                                                               *
+                          *       runtimeService.startProcessInstanceByKey("vacationRequest");     *
+                          *        } catch (ActivitiException e) {                                 *
+                          *                e.printStackTrace();                                    *
+                          *        }                                                               *
+                          **************************************************************************
+                                     
+                                      Query API
+                                 ---------------------
+1.There are two ways of querying data from the engine:
+                                                    1.The query API
+                                                    2.native queries
+         1.Query Api:-The Query API allows to program completely typesafe queries with a fluent API.
+                      We can add various conditions to your queries.
+                      ********************************************************************
+                      *       List<Task> tasks = taskService.createTaskQuery()           * 
+                      *                 .taskAssignee("kermit")                          * 
+                      *                 .processVariableValueEquals("orderId", "0815")   *
+                      *                 .orderByDueDate().asc().list();                  *
+                      ******************************************************************** 
+            
+                                         Variables
+                                    -------------------
+1.Every process instance needs and uses data to execute the steps it exists of.
+  In Activiti, this data is called variables, which are stored in the database.
+2.Variables can be used in expressions (for example to select the correct outgoing
+  sequence flow in an exclusive gateway), in java service tasks when calling external
+  services (for example to provide the input or store the result of the service call), etc.
+3.A process instance can have variables (called process variables), but also executions
+ (which are specific pointers to where the process is active) and user tasks can have variables. 
+4.
+--->  Any of the startProcessInstanceXXX methods have an optional parameters to provide the variables when the process instance is created and 
+      started.
+      For example, from the RuntimeService:
+                 *********************************************************************************************************
+                 * ProcessInstance startProcessInstanceByKey(String processDefinitionKey, Map<String, Object> variables);*
+                 ********************************************************************************************************* 
+--->  Variables can be added during process execution. For example (RuntimeService):
+          ****************************************************************************************
+          *  void setVariable(String executionId, String variableName, Object value);            *
+          *  void setVariableLocal(String executionId, String variableName, Object value);       *
+          *  void setVariables(String executionId, Map<String, ? extends Object> variables);     *
+          *  void setVariablesLocal(String executionId, Map<String, ? extends Object> variables);*
+          ****************************************************************************************
+
+                                       Expressions             
+                                 ----------------------
+1.Activiti uses UEL for expression-resolving. UEL stands for Unified Expression Language and is part of the EE6 specification.
+2.There are 2 types of expressions:-
+     **Value expression:-resolves to a value. By default, all process variables are available to use. Also all spring-beans (if using Spring) 
+                         are available to use in expressions.    
+                         Some examples:
+                                   **************************  
+                                   *   ${myVar}             *
+                                   *   ${myBean.myProperty} *   
+                                   **************************
+     **Method expression:- Invokes a method, with or without parameters.
+                           ** When invoking a method without parameters, be sure to add empty parentheses after the method-name 
+                              (as this distinguishes the expression from a value expression).
+                           The passed parameters can be literal values or expressions that are resolved themselves. Examples:   
+                                   ************************************************  
+                                   *    ${printer.print()}                        *
+                                   *    ${myBean.addNewOrder('orderName')}        *
+                                   *    ${myBean.doSomething(myVar, execution)}   *
+                                   ************************************************
+
+                                         Unit testing
+                                     ------------------------
+1.Business processes are an integral part of software projects and they should be tested in the same way normal application logic is tested: 
+  with unit tests.
+                           
+                                       The process engine in a web application
+                                     --------------------------------------------
+1.The ProcessEngine is a thread-safe class and can easily be shared among multiple threads. 
+2.In a web application, this means it is possible to create the process engine once when the container boots and shut down the engine when 
+  the container goes down.  
+3.The following code snippet shows how you can write a simple ServletContextListener to initialize and destroy process engines in a plain 
+  Servlet environment:
+                            *****************************************************************************************  
+                            *  public class ProcessEnginesServletContextListener implements ServletContextListener {*
+                            *                                                                                       * 
+                            *  public void contextInitialized(ServletContextEvent servletContextEvent) {            *
+                            *                ProcessEngines.init();                                                 * 
+                            *  }                                                                                    *
+                            *                                                                                       *
+                            *  public void contextDestroyed(ServletContextEvent servletContextEvent) {              *
+                            *               ProcessEngines.destroy();                                               *
+                            *  }                                                                                    *
+                            *                                                                                       *
+                            *  }                                                                                    *
+                            *****************************************************************************************
+     contextInitialized:-The contextInitialized method will delegate to ProcessEngines.init(). That will look for activiti.cfg.xml resource 
+                         files on the classpath, and create a ProcessEngine for the given configurations (e.g. multiple jars with a 
+                         configuration file).
+
+                         ** If you have multiple such resource files on the classpath, make sure they all have different names. 
+                             
+                            When the process engine is needed, it can be fetched using:-
+                            *******************************************  
+                            * ProcessEngines.getDefaultProcessEngine()* 
+                            *******************************************  
+                                             (or)
+                            *********************************************
+                            * ProcessEngines.getProcessEngine("myName");*
+                            *********************************************
++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+
+                                          Ch-5:Spring Integration
+                                        ============================
+                                       
+                                       
+                                         ProcessEngineFactoryBean
+                                       ----------------------------
+
+1.The 'ProcessEngine' can be configured as a regular Spring bean. 
+2.The starting point of the integration is the class 'org.activiti.spring.ProcessEngineFactoryBean'.
+  That bean takes a process engine configuration and creates the process engine.
+3.For Spring integration the configuration and engine beans will look like this:-
+                ************************************************************************************************************
+                *  <bean id="processEngineConfiguration" class="org.activiti.spring.SpringProcessEngineConfiguration">     *
+                *  ...                                                                                                     *
+                *  </bean>                                                                                                 *
+                *                                                                                                          * 
+                *  <bean id="processEngine" class="org.activiti.spring.ProcessEngineFactoryBean">                          *
+                *  <property name="processEngineConfiguration" ref="processEngineConfiguration" />                         *
+                *  </bean>                                                                                                 *
+                ************************************************************************************************************
+            **Note that the 'processEngineConfiguration' bean now uses the 'org.activiti.spring.SpringProcessEngineConfiguration' class.
+                       
+                                        Transactions
+                                      ----------------
+
+1.When passing the DataSource to the SpringProcessEngineConfiguration (using property "dataSource"), Activiti uses a 'org.springframework.jdbc.datasource'.'TransactionAwareDataSourceProxy' internally, which wraps the passed DataSource.                                   
+2.The section shown below contains the 'dataSource', 'transactionManager', 'processEngine' and the 'Activiti Engine services'.
+  --->name might be (activiti-context.xml)
+ **********************************************************************************************************************************************
+ *                     <?xml version="1.0" encoding="UTF-8"?>                                                                                 *
+ *  <beans xmlns="http://www.springframework.org/schema/beans"                                                                                *
+ *    xmlns:context="http://www.springframework.org/schema/context"                                                                           *
+ *    xmlns:tx="http://www.springframework.org/schema/tx"                                                                                      
+ *    xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+ *    xsi:schemaLocation="http://www.springframework.org/schema/beans   http://www.springframework.org/schema/beans/spring-beans.xsd           
+ *                        http://www.springframework.org/schema/context http://www.springframework.org/schema/context/spring-context-2.5.xsd
+ *                        http://www.springframework.org/schema/tx      http://www.springframework.org/schema/tx/spring-tx-3.0.xsd">
+ *
+ *                <!-- DataBase Configuration -->
+ *    <bean id="dataSource" class="org.springframework.jdbc.datasource.SimpleDriverDataSource">
+ *    <property name="url" value="jdbc:mysql://localhost:3306/activitibpm?autoReconnect=true" />
+ *    <property name="driverClass" value="com.mysql.jdbc.Driver" />
+ *    <property name="username" value="root" />
+ *    <property name="password" value="noorshid" />
+ *  </bean>
+ * 
+ *               <!-- TransactionManager -->
+ * <bean id="transactionManager" class="org.springframework.jdbc.datasource.DataSourceTransactionManager">
+ *   <property name="dataSource" ref="dataSource" />
+ * </bean>
+ * 
+ *                 <!-- ProcessEngine -->
+ * <bean id="processEngineConfiguration" class="org.activiti.spring.SpringProcessEngineConfiguration">
+ *   <property name="dataSource" ref="dataSource" />
+ *   <property name="transactionManager" ref="transactionManager" />
+ *   <property name="databaseSchemaUpdate" value="true" />
+ *   <property name="jobExecutorActivate" value="false" />
+ * </bean>
+ * 
+ * <bean id="processEngine" class="org.activiti.spring.ProcessEngineFactoryBean">
+ *   <property name="processEngineConfiguration" ref="processEngineConfiguration" />
+ * </bean>
+ * 
+ *                  <!-- Activiti Engine Services -->
+ * <bean id="repositoryService" factory-bean="processEngine" factory-method="getRepositoryService" />
+ * <bean id="runtimeService" factory-bean="processEngine" factory-method="getRuntimeService" />
+ * <bean id="taskService" factory-bean="processEngine" factory-method="getTaskService" />
+ * <bean id="historyService" factory-bean="processEngine" factory-method="getHistoryService" />
+ * <bean id="managementService" factory-bean="processEngine" factory-method="getManagementService" />
+ *
+ * <tx:annotation-driven transaction-manager="transactionManager"/>
+ *
+ * <bean id="userBean" class="com.bizruntime.UserBean">
+ *   <property name="runtimeService" ref="runtimeService" />
+ * </bean>
+ *
+ * <bean id="printer" class="com.bizruntime.Printer" />
+ *
+ * </beans>
+ **********************************************************************************************************************************************
+
+                                       Expressions
+                                  --------------------
+1.When using the'ProcessEngineFactoryBean', by default, all expressions in the BPMN processes will also see all the Spring beans. 
+2.It’s possible to limit the beans we want to expose in expressions or even exposing no beans at all using a map that we can configure.
+    **Note:-In expression ony using Key we have to call the method of the Bean class only.
+            The key will point to the bean of the class.
+    ---->For more info referred to chapter 4 section under 'Expression' of the Document.
+3. Below showing how to exposes a single bean (printer), available to use under the key "printer".
+                   ********************************************************************************************************   
+                   *  <bean id="processEngineConfiguration" class="org.activiti.spring.SpringProcessEngineConfiguration"> *
+                   *   ...                                                                                                *
+                   *   <property name="beans">                                                                            *
+                   *    <map>                                                                                             *
+                   *     <entry key="printer" value-ref="printer" />                                                      *
+                   *    </map>                                                                                            *
+                   *   </property>                                                                                        *
+                   *  </bean>                                                                                             *
+                   *                                                                                                      *
+                   *  <bean id="printer" class="org.activiti.examples.spring.Printer" />                                  *
+                   ********************************************************************************************************
+4.Now the exposed beans can be used in expressions as shown in below:-
+                   *******************************************************************************
+                   *  <serviceTask id="print" activiti:expression="#{printer.printMessage()}" /> *                     
+                   *******************************************************************************
+
+                                        Automatic resource deployment
+                                 -----------------------------------------
+1.Spring integration also has a special feature for deploying resources. In the process engine configuration, we can specify a set of 
+  resources. When the process engine is created, all those resources will be scanned and deployed. There is filtering in place that prevents 
+  duplicate deployments.
+2.Below is the snippet:-
+                 *********************************************************************************************************
+                 *    <bean id="processEngineConfiguration" class="org.activiti.spring.SpringProcessEngineConfiguration">* 
+                 *          ...                                                                                          *
+                 *     <property name="deploymentResources"                                                              *
+                 *       value="classpath*:/org/activiti/spring/test/autodeployment/autodeploy.*.bpmn20.xml" />          *  
+                 *    </bean>                                                                                            *    
+                 *                                                                                                       *
+                 *    <bean id="processEngine" class="org.activiti.spring.ProcessEngineFactoryBean">                     *  
+                 *      <property name="processEngineConfiguration" ref="processEngineConfiguration" />                  *
+                 *     </bean>                                                                                           *
+                 *********************************************************************************************************
+   ----->By default, the configuration above will group all of the resources matching the filtering into a single deployment to the 
+         Activiti engine.
+                                                              
+                                         Unit testing
+                                ---------------------------
+1.When integrating with Spring, business processes can be tested very easily using the standard Activiti testing facilities. 
+2.The following example shows how a business process is tested in a typical Spring-based unit test:
+          
+              @RunWith(SpringJUnit4ClassRunner.class)
+              @ContextConfiguration("classpath:org/activiti/spring/test/junit4/springTypicalUsageTest-context.xml")
+              public class MyBusinessProcessTest {
+
+              @Autowired
+              private RuntimeService runtimeService;
+
+              @Autowired
+              private TaskService taskService;
+
+             @Autowired
+             @Rule
+             public ActivitiRule activitiSpringRule;
+
+             @Test
+             @Deployment
+             public void simpleProcessTest() {
+             runtimeService.startProcessInstanceByKey("simpleProcess");
+             Task task = taskService.createTaskQuery().singleResult();
+             assertEquals("My Task", task.getName());
+
+             taskService.complete(task.getId());
+             assertEquals(0, runtimeService.createProcessInstanceQuery().count());
+
+           }
+          }
+
+3.Note that for this to work, we need to define a org.activiti.engine.test.ActivitiRule bean in the Spring configuration (which is injected 
+  by auto-wiring in the example above).
+      
+             <bean id="activitiRule" class="org.activiti.engine.test.ActivitiRule">
+             <property name="processEngine" ref="processEngine" />
+             </bean>
+ 
+                                                         Spring Boot
+                                                    ----------------------
+1.Spring Boot is an application framework which, according to its website, makes it easy to create stand-alone, production-grade Spring based 
+  Applications that can we can "just run".
+   ---->Features:-
+                 1.Create stand-alone Spring applications
+                 2.Embed Tomcat, Jetty or Undertow directly (no need to deploy WAR files)
+                 3.Provide opinionated 'starter' POMs to simplify your Maven configuration
+                 4.Automatically configure Spring whenever possible
+                 6.Provide production-ready features such as metrics, health checks and externalized configuration
+                 7.Absolutely no code generation and no requirement for XML configuration  
+2.**Spring Boot is all about convention over configuration. To get started, simply add the 'spring-boot-starters-basic' 
+  dependency to our project.
+3.Sample of  Spring Boot application:-
+                    ****************************************************************************
+                    *  import org.springframework.boot.SpringApplication;                      *
+                    *  import org.springframework.boot.autoconfigure.EnableAutoConfiguration;  *
+                    *  import org.springframework.context.annotation.ComponentScan;            *
+                    *  import org.springframework.context.annotation.Configuration;            *
+                    *                                                                          *
+                    *  @Configuration                                                          * 
+                    *  @ComponentScan                                                          *
+                    *  @EnableAutoConfiguration                                                *
+                    *  public class MyApplication {                                            *
+                    *                                                                          *
+                    *  public static void main(String[] args) {                                *
+                    *  SpringApplication.run(MyApplication.class, args);                       *
+                    *  }                                                                       *  
+                    *                                                                          *
+                    *  }                                                                       *
+                    ****************************************************************************
+4.So by just adding the dependency to the classpath and using the '@EnableAutoConfiguration' annotation a lot has happened behind the scenes:
+  -----> An in-memory datasource is created automatically and passed to the Activiti process engine configuration.
+  -----> An Activiti ProcessEngine bean is created and exposed.
+  -----> All the Activiti services are exposed as Spring beans.
+  -----> The Spring Job Executor is created.
+5. Any BPMN 2.0 process definition in the 'processes' folder would be automatically deployed.
+   Create a folder processes and add a dummy process definition (named as one-task-process.bpmn20.xml) to this folder.
+   ---->Refer to the example done(activit-Spring-boot2)
+6.The 'CommandLineRunner' is a special kind of Spring bean that is executed when the application boots.
+             *************************************************************************************************
+             *           @Bean                                                                               *
+             *      public CommandLineRunner init(final RepositoryService repositoryService,                 * 
+             *                     final RuntimeService runtimeService,                                      *
+             *                     final TaskService taskService) {                                          *
+             *                                                                                               * 
+             *      return new CommandLineRunner() {                                                         *
+             *     @Override                                                                                 *         
+             *     public void run(String... strings) throws Exception {                                     *
+             *    log.info("Number of process definitions : "                                                *
+             *      	+ repositoryService.createProcessDefinitionQuery().count());                         *
+             *    log.info("Number of tasks : " + taskService.createTaskQuery().count());                    *
+             *    runtimeService.startProcessInstanceByKey("oneTaskProcess");                                *
+             *    log.info("Number of tasks after process start: " + taskService.createTaskQuery().count()); *
+             *   }                                                                                           *
+             *   };                                                                                          *
+             *************************************************************************************************
+
+                           
+                                        Changing the database and connection pool
+                                      ---------------------------------------------
+1.As stated above, Spring Boot is about convention over configuration.
+  By default, by having only H2 on the classpath, it created an in memory
+  datasource and passed that to the Activiti process engine configuration.
+2.To change the datasource, simply override the default by providing a Datasource bean.
+  We use 'DataSourceBuilder' class, which is a helper class from Spring Boot.
+  ----For example, to switch to a MySQL database:
+      **************************************************************************************
+      *   @Bean                                                                            * 
+      *   public DataSource database() {                                                   *
+      *   return DataSourceBuilder.create()                                                *
+      *  .url("jdbc:mysql://localhost:3306/activiti-spring-boot")  *
+      *  .username("root")                                                             *
+      *  .password("noorshid")                                                             * 
+      *  .driverClassName("com.mysql.jdbc.Driver")                                         *
+      *  .build();                                                                         *          
+      *   }                                                                                *
+      **************************************************************************************
+    **---->Remove H2 from the Maven dependencies and add the MySQL driver and the Tomcat connection(tomcat-jdbc) pooling to the classpath.
+
+                                                REST support
+                                             -----------------
+1.Often, a REST API is needed on top of the embedded Activiti engine (interacting with the different services in a company).
+2.Spring Boot makes this really easy.
+3.Add the following dependency to the classpath
+             *************************************************************
+             *        <dependency>                                       *
+	     *         <groupId>org.springframework.boot</groupId>       *
+	     *         <artifactId>spring-boot-starter-web</artifactId>  * 
+	     *         <version>${spring.boot.version}</version>         *
+             *        </dependency>                                      *
+             ************************************************************* 
+4.Create a new class, a Spring service, and create two methods: one to start our process and one to get a task list for a given assignee.
+   **************************************************************************
+   *   @Service                                                             *                                                     
+   *     public class MyService {                                           *
+   *                                                                        *
+   *   @Autowired                                                           *
+   *     private RuntimeService runtimeService;                             *
+   *                                                                        *
+   *   @Autowired                                                           *
+   *     private TaskService taskService;                                   *
+   *                                                                        * 
+   *   @Transactional                                                       *
+   *     public void startProcess() {                                       *
+   *     runtimeService.startProcessInstanceByKey("oneTaskProcess");        *
+   *   }                                                                    *
+   *                                                                        * 
+   *   @Transactional                                                       *
+   *     public List<Task> getTasks(String assignee) {                      *
+   *     return taskService.createTaskQuery().taskAssignee(assignee).list();*
+   *    }                                                                   * 
+   *                                                                        *
+   *    }                                                                   *
+   **************************************************************************
+5.We can now create a REST endpoint by annotating a class with @RestController:-
+   ****************************************************************************************************************
+   *       @RestController                                                                                        *
+   *       public class MyRestController {                                                                        *
+   *                                                                                                              *
+   *       @Autowired                                                                                             *
+   *       private MyService myService;                                                                           *
+   *                                                                                                              *
+   *       @RequestMapping(value="/process", method= RequestMethod.POST)                                          *
+   *       public void startProcessInstance() {                                                                   *
+   *       myService.startProcess();                                                                              *  
+   *     }                                                                                                        * 
+   *                                                                                                              *
+   *       @RequestMapping(value="/tasks", method= RequestMethod.GET, produces=MediaType.APPLICATION_JSON_VALUE)  *
+   *       public List<TaskRepresentation> getTasks(@RequestParam String assignee) {                              *
+   *       List<Task> tasks = myService.getTasks(assignee);                                                       * 
+   *       List<TaskRepresentation> dtos = new ArrayList<TaskRepresentation>();                                   *
+   *       for (Task task : tasks) {                                                                              *
+   *         dtos.add(new TaskRepresentation(task.getId(), task.getName()));                                      *
+   *        }                                                                                                     *  
+   *       return dtos;                                                                                           *
+   *      }                                                                                                       *
+   *      static class TaskRepresentation {                                                                       *
+   *                                                                                                              *
+   *      private String id;                                                                                      * 
+   *      private String name;                                                                                    * 
+   *                                                                                                              *
+   *      public TaskRepresentation(String id, String name) {                                                     *
+   *         this.id = id;                                                                                        * 
+   *         this.name = name;                                                                                    *
+   *     }                                                                                                        *
+   *                                                                                                              *
+   *      public String getId() {                                                                                 *
+   *         return id;                                                                                           * 
+   *     }                                                                                                        * 
+   *     public void setId(String id) {                                                                           *
+   *         this.id = id;                                                                                        *
+   *     }                                                                                                        *
+   *     public String getName() {                                                                                *  
+   *         return name;                                                                                         * 
+   *     }                                                                                                        *
+   *     public void setName(String name) {                                                                       *
+   *         this.name = name;                                                                                    *
+   *     }                                                                                                        *  
+   *                                                                                                              *
+   *    }                                                                                                         *  
+   *                                                                                                              *
+   *    }                                                                                                         *  
+   ****************************************************************************************************************
+6.Both the '@Service' and the '@RestController' will be found by the automatic component scan (@ComponentScan) we added to our application     
+  class.
+7.****VVI--->1.This app is based on spring-boot rest support.
+             2.There may be a probability of stucking in error such as 'methodNotfound'exception which can be resolved by
+               adding the 'spring-boot-starter-parent' as our pom's parent(add before  dependencies tag).
+             3.Additional dependency have to add is spring-context with proper version. 
+             4.     Access the following url 
+                    1.http://localhost:8080/tasks?assignee=kermit
+                    2.POST  http://localhost:8080/process
+                    3.Invoke===>http://localhost:8080/tasks?assignee=kermit
+                    should return===> [{"id":"10004","name":"my task"}]   
+         
+                                           JPA support
+                                       ------------------
+1.To add in JPA support for Activiti in Spring Boot, add following dependency:
+                 **************************************************************
+                 *  <dependency>                                              * 
+	         *  <groupId>org.activiti</groupId>                           *
+	         *  <artifactId>activiti-spring-boot-starter-jpa</artifactId> * 
+	         *  <version>${activiti.version}</version>                    *
+                 *  </dependency>                                             *
+                 **************************************************************  
+  *---->This will add in the Spring configuration and beans for using JPA. By default the JPA provider will be Hibernate.
+2.After that creat simple entity class
+  **********************************************************************************************************
+  *       @Entity                                                                                          * 
+  *      class Person {                                                                                    *  
+  *                                                                                                        *  
+  *  @Id                                                                                                   *
+  *  @GeneratedValue                                                                                       *
+  *  private Long id;                                                                                      *
+  *                                                                                                        * 
+  *  private String username;                                                                              *
+  *                                                                                                        *
+  *  private String firstName;                                                                             *
+  *                                                                                                        *
+  *  private String lastName;                                                                              * 
+  *                                                                                                        *
+  *   private Date birthDate;                                                                              *
+  *                                                                                                        *
+  *  public Person() {                                                                                     *
+  *  }                                                                                                     *  
+  *                                                                                                        *
+  *  public Person(String username, String firstName, String lastName, Date birthDate) {                   *
+  *      this.username = username;                                                                         *
+  *      this.firstName = firstName;                                                                       *
+  *      this.lastName = lastName;                                                                         *
+  *      this.birthDate = birthDate;                                                                       *
+  *  }                                                                                                     *  
+  *                                                                                                        *
+  *  public Long getId() {                                                                                 *         
+  *      return id;                                                                                        *
+  *  }                                                                                                     *
+  *                                                                                                        *
+  *  public void setId(Long id) {                                                                          *
+  *      this.id = id;                                                                                     *  
+  *  }                                                                                                     *
+  *                                                                                                        * 
+  *  public String getUsername() {                                                                         *
+  *      return username;                                                                                  *
+  *  }                                                                                                     *
+  *                                                                                                        *
+  *  public void setUsername(String username) {                                                            *
+  *      this.username = username;                                                                         *
+  *  }                                                                                                     *
+  *                                                                                                        * 
+  *  public String getFirstName() {                                                                        *
+  *      return firstName;                                                                                 *
+  *  }                                                                                                     * 
+  *                                                                                                        *
+  *  public void setFirstName(String firstName) {                                                          * 
+  *      this.firstName = firstName;                                                                       *
+  *  }                                                                                                     *
+  *                                                                                                        *
+  *  public String getLastName() {                                                                         * 
+  *      return lastName;                                                                                  *
+  *  }                                                                                                     *
+  *                                                                                                        *
+  *  public void setLastName(String lastName) {                                                            *
+  *      this.lastName = lastName;                                                                         *
+  *  }                                                                                                     *  
+  *                                                                                                        *
+  *  public Date getBirthDate() {                                                                          * 
+  *      return birthDate;                                                                                 * 
+  *  }                                                                                                     *    
+  *                                                                                                        *
+  *  public void setBirthDate(Date birthDate) {                                                            *               
+  *      this.birthDate = birthDate;                                                                       * 
+  *  }                                                                                                     *
+  *  }                                                                                                     *
+  **********************************************************************************************************
+3.By default, when not using an in-memory database, the tables won’t be created automatically. Create a file 'application.properties' on the 
+  classpath and add following property:
+     **************************************
+     *spring.jpa.hibernate.ddl-auto=update*
+     **************************************
+4.Add the following class:
+     ****************************************************************************
+     *   public interface PersonRepository extends JpaRepository<Person, Long> {*
+     *                                                                          * 
+     *      Person findByUsername(String username);                             *  
+     *                                                                          *
+     *     }                                                                    * 
+     ****************************************************************************
+   ***--->This is a Spring repository, which offers CRUD out of the box. We add the method to find a Person by username. 
+          Spring will automagically implement this based on conventions (i.e. the property names used)
+5.We now enhance our service further:
+   #by adding @Transactional to the class.
+      ************************************************************************************************
+      *    @Service                                                                                  * 
+      *    @Transactional                                                                            *
+      *    public class MyService {                                                                  *
+      *                                                                                              *
+      *    @Autowired                                                                                * 
+      *    private RuntimeService runtimeService;                                                    * 
+      *                                                                                              * 
+      *    @Autowired                                                                                *
+      *    private TaskService taskService;                                                          *
+      *                                                                                              *
+      *    @Autowired                                                                                * 
+      *    private PersonRepository personRepository;                                                *
+      *                                                                                              *
+      *    public void startProcess(String assignee) {                                               *
+      *                                                                                              *
+      *    Person person = personRepository.findByUsername(assignee);                                *
+      *                                                                                              *
+      *    Map<String, Object> variables = new HashMap<String, Object>();                            *
+      *    variables.put("person", person);                                                          *                                         
+      *    runtimeService.startProcessInstanceByKey("oneTaskProcess", variables);                    *
+      *     }                                                                                        *
+      *                                                                                              * 
+      *    public List<Task> getTasks(String assignee) {                                             *
+      *    return taskService.createTaskQuery().taskAssignee(assignee).list();                       * 
+      *   }                                                                                          *
+      *                                                                                              *
+      *   public void createDemoUsers() {                                                            *
+      *		 if (personRepository.findAll().size() == 0) {                                       *
+      *        personRepository.save(new Person("jbarrez", "Joram", "Barrez", new Date()));          *  
+      *        personRepository.save(new Person("trademakers", "Tijs", "Rademakers", new Date()));   *
+      *       }                                                                                      *
+      *     }                                                                                        * 
+      *  }                                                                                           *                 
+      ************************************************************************************************
+6.The CommandLineRunner now looks like:-
+    **************************************************************
+    *  @Bean                                                     * 
+    *  public CommandLineRunner init(final MyService myService) {*
+    *                                                            *
+    * 	return new CommandLineRunner() {                         *
+    *	public void run(String... strings) throws Exception {    *
+    *    	myService.createDemoUsers();                     *
+    *    }                                                       *  
+    *  };                                                        *
+    * }                                                          * 
+    ************************************************************** 
+7.The RestController is also slightly changed to incorporate the changes
+   ***********************************************************************************************************
+   *   @RestController                                                                                       * 
+   *   public class MyRestController {                                                                       *
+   *                                                                                                         *
+   *   @Autowired                                                                                            *
+   *   private MyService myService;                                                                          *
+   *                                                                                                         *
+   *   @RequestMapping(value="/process", method= RequestMethod.POST)                                         *
+   *  public void startProcessInstance(@RequestBody StartProcessRepresentation startProcessRepresentation) { *
+   *     myService.startProcess(startProcessRepresentation.getAssignee());                                   *
+   *  }                                                                                                      *
+   *                                                                                                         *                            
+   *                                                                                                         * 
+   *  ...                                                                                                    *
+   *                                                                                                         *
+   *  static class StartProcessRepresentation {                                                              * 
+   *                                                                                                         *
+   *      private String assignee;                                                                           *
+   *                                                                                                         *  
+   *      public String getAssignee() {                                                                      *
+   *         return assignee;                                                                                *
+   *      }                                                                                                  *
+   *                                                                                                         *
+   *      public void setAssignee(String assignee) {                                                         *
+   *         this.assignee = assignee;                                                                       * 
+   *     }                                                                                                   *
+   *   }                                                                                                     *
+   *********************************************************************************************************** 
+
+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+             
+                                    ch-6:-Deployment
+                                 =====================
+
+                                  Business archives
+                                 -------------------
+1.To deploy processes, they have to be wrapped in a business archive.
+  **--->A business archive is the unit of deployment to an Activiti Engine.
+        ** A 'business archive' is equivalent to a 'zip file'.
+ ---> It can contain BPMN 2.0 processes, task forms, rules and any other type of file. In general, a business archive contains a
+      collection of named resources.
+2.When a business archive is deployed, it is scanned for BPMN files with a '.bpmn20.xml' or '.bpmn' extension. Each of those will be parsed and may contain multiple process definitions.
+
+                              Deploying programmatically
+                            -----------------------------
+1.---->Deploying a business archive from a zip file can be done like this:
+      ***************************************************************************************
+      *  String barFileName = "path/to/process-one.bar";                                    *
+      *  ZipInputStream inputStream = new ZipInputStream(new FileInputStream(barFileName)); * 
+      *                                                                                     *
+      * repositoryService.createDeployment()                                                * 
+      * .name("process-one.bar")                                                            *
+      * .addZipInputStream(inputStream)                                                     * 
+      * .deploy();                                                                          *
+      ***************************************************************************************
+                 
+                               Deploying with Activiti Explorer
+                           ----------------------------------------
+1.The Activiti Explorer webapp allows uploading bar files (and single bpmn20.xml files) through the webapp user interface.
+2.Follow the steps Management--->Deployments--->Upload new
+              
+                                  External resources
+                                ---------------------
+1.Process definitions live in the Activiti database.
+2.These process definitions can reference delegation classes when using Service Tasks or execution listeners or Spring beans from the Activiti 
+  configuration file
+3.These classes and the Spring configuration file have to be available to all process engines that may execute the process definitions.
+                       
+                                   Java classe                 
+                                 --------------
+1.All custom classes that are used in our process (e.g. JavaDelegates used in Service Tasks or event-listeners, TaskListeners, …​) 
+  should be present on the engine’s classpath when an instance of the process is started.
+2.**During deployment of a business archive however, those classes don’t have to be present on the classpath.**
+
+                              Using Spring beans from a process 
+                            -------------------------------------
+1.When expressions or scripts use Spring beans, those beans have to be available to the engine when executing the process definition.
+2.We also should update the Activiti rest webapp with that context if we use it. You can do that by replacing the activiti.cfg.xml in 
+  the activiti-rest/lib/activiti-cfg.jar JAR file with an activiti-context.xml file containing our Spring context configuration.
+
+                                  Creating a single app
+                              ----------------------------
+1.Including the Activiti rest webapp inside our own webapp so that there is only a single ProcessEngine.
+
+                             Versioning of process definitions
+                          --------------------------------------
+1.BPMN doesn’t have a notion of versioning.
+2. BPMN process file will probably live in a version control system repository (e.g. Subversion, Git or Mercurial) as part of our development 
+   project.
+3.Versions of process definitions are created during deployment.
+4.During deployment, Activiti will assign a version to the 'ProcessDefinition' before it is stored in the Activiti DB.
+5.For each process definition in a business archive the following steps are performed to initialize the properties 'key', 'version', name and 
+  'id':
+      ---->The process definition 'id' attribute in the XML file is used as the process definition key property.
+      ---->The process definition name attribute in the XML file is used as the process definition name property.
+           If the name attribute is not specified, then id attribute is used as the name.
+      ---->The first time a process with a particular key is deployed, version 1 is assigned.
+           For all subsequent deployments of process definitions with the same key, the version
+           will be set 1 higher than the maximum currently deployed version.
+           **The key property is used to distinguish process definitions.
+      ---->The id property is set to {processDefinitionKey}:{processDefinitionVersion}:{generated-id}, where generated-id 
+           is a unique number added to guarantee uniqueness of the process id for the process definition caches in a 
+           clustered environment.
+6.When the 'runtimeService.startProcessInstanceByKey("myProcess")' is called, it will always take the latest veresion of the 
+  process deifinition.
+7. Activiti only considers the id attribute when distinguishing processes.
+
+                           Providing a process diagram
+                         ---------------------------------
+1.A process diagram image can be added to a 'deployment'. This image will be stored in the 'Activiti repository' and is accessible 
+  through the API.  
+2.Suppose we have a process on our classpath, 'org/activiti/expenseProcess.bpmn20.xml' that has a process key expense. 
+  The following naming conventions for the process diagram image apply:-
+  1.If an image resource exists in the deployment that has a name of the BPMN 2.0 XML file name concatenated with the
+    process key and an image suffix, this image is used.  
+  2.If no such image exists, am image resource in the deployment matching the name of the BPMN 2.0 XML file is searched for.
+
+3.#Example when deploying programmatically:
+                ******************************************************************
+                *  repositoryService.createDeployment()                          *
+                * .name("expense-process.bar")                                   *
+                * .addClasspathResource("org/activiti/expenseProcess.bpmn20.xml")*
+                * .addClasspathResource("org/activiti/expenseProcess.png")       *  
+                * .deploy();                                                     *
+                ******************************************************************
+  #The image resource can be retrieved through the API afterwards:
+                *****************************************************************************************
+                * ProcessDefinition processDefinition = repositoryService.createProcessDefinitionQuery()*
+                * .processDefinitionKey("expense")                                                      *
+                * .singleResult();                                                                      *
+                *                                                                                       *
+                * String diagramResourceName = processDefinition.getDiagramResourceName();              * 
+                * InputStream imageStream = repositoryService.getResourceAsStream(                      *   
+                * processDefinition.getDeploymentId(), diagramResourceName);                            *   
+                *****************************************************************************************
+
+                          Generating a process diagram
+                         ------------------------------
+1.Activiti engine will generate a diagram image if the process definition contains the necessary diagram interchange information.
+  **The resource can be retrieved in exactly the same way as when an image is provided in the deployment.
+2.If, for some reason, it is not necessary or wanted to generate a diagram during deployment the isCreateDiagramOnDeploy 
+  property can be set on the process engine configuration:       
+   **********************************************************
+   * <property name="createDiagramOnDeploy" value="false" />*
+   ********************************************************** 
+               
+                           Category
+                      -----------------
+1.Both deployments and process definitions have user defined categories. The process definition category 
+  is initialized value in attribute in the BPMN file: <definitions …​ targetNamespace="ourCategory" …​
+2.The deployment category can be specified in the API like this:
+       ******************************
+       * repositoryService          *
+       * .createDeployment()        *
+       * .category("ourCategory")  *
+       * ...                        *      
+       * .deploy();                 *
+       ******************************                    
+
++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+
+                                           Ch-7:BPMN 2.0 Introduction
+                                          =============================
+1.BPM, with respect to system engineering, provides methods and techniques to make a
+  business process more efficient, adaptive, and effective to accomplish business tasks.
+2.We use  BPMN 2.0 modeling notations for designing our business process with the Activiti
+  Engine. It provides a comprehensive approach to aligning an organization's business process
+  as per the client's requirement.
+
+                                            Defining a process
+                                          -----------------------
+1.Create a new XML file (right-click on any project and select New→Other→XML-XML File) and give it a name.
+  Make sure that the file ends with '.bpmn20.xml' or '.bpmn', since otherwise the engine won’t pick up this file for deployment.
+2.The root element of the BPMN 2.0 schema is the 'definitions' element.
+  Within this element, multiple process definitions can be defined
+3.An empty process definition looks as listed below. Note that the minimal definitions element only needs the xmlns and targetNamespace  
+  declaration.
+  The targetNamespace can be anything, and is useful for categorizing process definitions:-
+       ************************************************************************
+       * <definitions                                                         *
+       *      xmlns="http://www.omg.org/spec/BPMN/20100524/MODEL"             *
+       *      xmlns:activiti="http://activiti.org/bpmn"                       *
+       *      targetNamespace="Examples">                                     *
+       *       xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"          * 
+       *       xsi:schemaLocation="http://www.omg.org/spec/BPMN/20100524/MODEL*
+       *             http://www.omg.org/spec/BPMN/2.0/20100501/BPMN20.xsd     *
+       *                                                                      * 
+       *                                                                      *
+       *    <process id="myProcess" name="My First Process">                  *
+       *   ..                                                                 * 
+       *   </process>                                                         *
+       *                                                                      *
+       *  </definitions>                                                      *
+       ************************************************************************
+4.The process element has two attributes:
+  #id:- This attribute is required and maps to the key property of 
+        an Activiti ProcessDefinition object.
+        This id can then be used to start a new process instance of 
+        the process definition, through the 'startProcessInstanceByKey' method 
+        on the RuntimeService.  
+        This method will always take the 'latest deployed' version of the 'process definition'.
+         *******************************************************************************************
+         * ProcessInstance processInstance = runtimeService.startProcessInstanceByKey("myProcess");*  
+         *******************************************************************************************
+      **---->Important to note here is that this is not the same as calling the 'startProcessInstanceById' method.
+             This method expects the String id that was generated at deploy time by the 'Activiti engine', and can
+             be retrieved by calling the 'processDefinition.getId()' method.
+             **The format of the generated id is key:version, and the length is constrained to 64 characters.
+             **If we get an ActivitiException stating that the generated id is too long, limit the text in the key field of the process. 
+  #name:-This attribute is optional and maps to the name property of a 'ProcessDefinition'.
+         The engine itself doesn’t use this property, so it can be used for displaying a more human-friendly name in a user interface.  
+           
+                                              Getting started(10 minutes tutorial)
+                                             ---------------------------------------
+XML representation:-
+**---->The '(none) start event' tells us what the entry point to the process is.
+**---->The process ends when the none end event is reached.
+**---->The elements are connected with each other through 'sequence flows'.
+
+#step1.create a xml file by name 'FinancialReportProcess.bpmn20.xml'.
+  *******************************************************************************************         
+  *  <definitions id="definitions"
+  *  targetNamespace="http://activiti.org/bpmn20"
+  *  xmlns:activiti="http://activiti.org/bpmn"
+  *  xmlns="http://www.omg.org/spec/BPMN/20100524/MODEL">
+
+	<process id="financialReport" name="Monthly financial report reminder process">
+
+	  <startEvent id="theStart" />
+
+	  <sequenceFlow id='flow1' sourceRef='theStart' targetRef='writeReportTask' />
+
+	  <userTask id="writeReportTask" name="Write monthly financial report" >
+	    <documentation>
+	      Write monthly financial report for publication to shareholders.
+	    </documentation>
+	    <potentialOwner>
+	      <resourceAssignmentExpression>
+	        <formalExpression>accountancy</formalExpression>
+	      </resourceAssignmentExpression>
+	    </potentialOwner>
+	  </userTask>
+
+	  <sequenceFlow id='flow2' sourceRef='writeReportTask' targetRef='verifyReportTask' />
+
+	  <userTask id="verifyReportTask" name="Verify monthly financial report" >
+	    <documentation>
+	      Verify monthly financial report composed by the accountancy department.
+	      This financial report is going to be sent to all the company shareholders.
+	    </documentation>
+	    <potentialOwner>
+	      <resourceAssignmentExpression>
+	        <formalExpression>management</formalExpression>
+	      </resourceAssignmentExpression>
+	    </potentialOwner>
+	  </userTask>
+
+	  <sequenceFlow id='flow3' sourceRef='verifyReportTask' targetRef='theEnd' />
+
+	  <endEvent id="theEnd" />
+
+	  </process>
+
+       </definitions>
+    ******************************************************************************************** 
+ 
+#step2.--->Starting a process instance:-
+                1.We have now created the process definition of our business process. From such a process definition,
+                  we can create process instances. 
+                2.In this case, one process instance would match with the creation and verification of a single
+                  financial report for a particular month.
+                3.All the process instances share the same process definition.
+     
+        **To be able to create process instances from a given process definition, we must first deploy this process definition. 
+         Deploying a process definition means two things:-
+         1.The process definition will be stored in the persistent datastore that is configured for our Activiti engine. 
+           So by deploying our business process, we make sure that the engine will find the process definition after an engine reboot. 
+         2.The BPMN 2.0 process file will be parsed to an in-memory object model that can be manipulated through the Activiti API.
+              ---->Deploying through the API as follows :- 
+                  ****************************************************************
+                  * Deployment deployment = repositoryService.createDeployment() *
+                  * .addClasspathResource("FinancialReportProcess.bpmn20.xml")   *
+                  * .deploy();                                                   *
+                  ****************************************************************
+              ---->Now we can start a new process instance using the id we defined in the process definition:-
+                   **Note that this 'id' in Activiti terminology is called the 'key'
+                  ************************************************************************************************
+                  *ProcessInstance processInstance = runtimeService.startProcessInstanceByKey("financialReport");* 
+                  ************************************************************************************************ 
+     
+                 **This will create a process instance that will first go through the start event. After the start event, 
+                   it follows all the outgoing sequence flows (only one in this case) and the first task (write monthly financial report)
+                   is reached. The Activiti engine will now store a task in the persistent database. At this point, the user or group
+                   assignments attached to the task are resolved and also stored in the database. It’s important to note that the 
+                   Activiti engine will continue process execution steps until it reaches a 'wait state', such as the 'user task'.
+                   At such a wait state, the current state of the process instance is stored in the database. It remains in that state 
+                   until a user decides to complete their task. At that point, the engine will continue until it reaches a new wait state 
+                   or the end of the process. When the engine reboots or crashes in the meantime, the state of the process is safe and well 
+                   in the database.
+                   --->After the task is created, the 'startProcessInstanceByKey' method will return since the user task activity
+                       is a wait state.
+                       **In this case, the task is assigned to a group, which means that every member of the group is a candidate 
+                         to perform the task.
+                   --->we must first construct a ProcessEngine that gives us access to the services.
+
+#step3.---->The java class somewhat look like this:-
+            ***********************************************************************************************************************      
+            *        // Create Activiti process engine                                                                            * 
+            *      ProcessEngine processEngine=ProcessEngines.getDefaultProcessEngine();                                          *
+            *                                                                                                                     *
+            *       //Get Activiti services                                                                                       * 
+            *      RepositoryService repositoryService=processEngine.getRepositoryService();                                      *
+            *      RuntimeService runtimeService=processEngine.getRuntimeService();                                               *
+            *                                                                                                                     *
+            *      //Deploy the process definition                                                                                *
+            *  repositoryService.createDeployment().addClasspathResource("diagrams/FinalcialReportProcess.bpmn20.xml").deploy();  *
+            *                                                                                                                     *
+            *   //start a process instance                                                                                        *
+            *   runtimeService.startProcessInstanceByKey("finalcialReport");                                                      *
+            *   log.info("Number of process Instance :"+repositoryService.createProcessDefinitionQuery().count());                * 
+            *                                                                                                                     *   
+            *   //To verify the new process instance is started                                                                   * 
+            *  log.info("Number of process Instances: "+runtimeService.createProcessInstanceQuery().count());                     *   
+            ***********************************************************************************************************************
+                                       ----Task lists---
+
+            -----> We can now retrieve this task through the TaskService by adding the following logic:-
+                 **************************************************************************************
+                 *List<Task> tasks = taskService.createTaskQuery().taskCandidateUser("kermit").list();*
+                 **************************************************************************************
+           ----->We could also use the task query API to get the same results which is mentioned in xml file as shown below:-
+                 *********************************************************************************************
+                 * TaskService taskService = processEngine.getTaskService();                                 *
+                 * List<Task> tasks = taskService.createTaskQuery().taskCandidateGroup("accountancy").list();*
+                 ********************************************************************************************* 
+#step4.----> Login with kermit/kermit, click Groups and then "Create group". Then click Users and add the group to fozzie.
+       ---->.Now login with fozzie/fozzie, and we will find that we can start our business process after selecting the Processes
+             page and clicking on the 'Start Process' link in the 'Actions' column corresponding to the 'Monthly financial report'
+             process.
+       ---->Now login as kermit/kermit.
+            ==>we can see that there is a new candidate task available for him after we’ve started a process instance.
+            ==>Select the Tasks page to view this new task. 
+            ==>In queued we will find 'task' in 'accountancy'. 
+
+
+#step5.--->                ----Claiming the task(That is accountancy group and is done by fozzie)----
+      ----->An accountant now needs to claim the task.
+            
+           'By claiming the task, the specific user will become 
+            the assignee of the task and the task will disappear from every task 
+            list of the other members of the accountancy group.'
+      
+     ----->Claiming a task is programmatically done as follows:
+           ********************************************        
+           *taskService.claim(task.getId(), "fozzie");*
+           ********************************************
+          **Before that create one task as follows
+           *****************************************************
+           *      Task task=tasks.get(0);                      *
+           *****************************************************
+     
+    ----->The task is now in the personal task list of the one that claimed the task:-
+           ********************************************************************************* 
+           *List<Task> tasks = taskService.createTaskQuery().taskAssignee("fozzie").list();*
+           *********************************************************************************
+    
+    ----->Completing the task:
+           ***************************************
+           * taskService.complete(task.getId()); *
+           *************************************** 
+
+------>For the Activiti engine, this is an external signal that the process instance execution must be continued. 
+       The task itself is removed from the runtime data. 
+       The same mechanism as described for the first task will now be used to assign the second task, with the small difference 
+       that the task will be assigned to the management group.
+#step6.---->
+       Now we wanna complete the management group task that by the user 'kermit'.Before that
+       we have completed for the accountancy group task that is done by the user 'fozzie'.
+     ********************************************************************************************
+     *          //Logic for second Human task that is 'management' 
+     *
+     *      //logic for adding task to accountancy group
+     *   List<Task> tasks2=taskService.createTaskQuery().taskCandidateGroup("management").list();
+     *    //claiming the task
+     *   Task task2=tasks2.get(0);
+     *   taskService.claim(task2.getId(),"kermit");
+     *  //The task is now in the personal task list of the one that claimed the task.
+     *   taskService.createTaskQuery().taskAssignee("kermit").list();
+     * //Completing the task
+     *   taskService.complete(task2.getId());
+     *  log.info("Management task is successfully completed by kermit");
+     **********************************************************************************************
+----->Complete java code is somewhat  look like this
+     ****************************************************************************************************************************
+     *  public class ActivitiFinalcial {                                                                                        *
+     *	static Logger log = Logger.getLogger(ActivitiFinalcial.class);                                                          * 
+     *                                                                                                                          *
+     *	public static void main(String[] args) {                                                                                * 
+     *		BasicConfigurator.configure();                                                                                  * 
+     *                                                                                                                          * 
+     *	      // Creating Activiti process engine                                                                               * 
+     *		ProcessEngine processEngine = ProcessEngines.getDefaultProcessEngine();                                         * 
+     *                                                                                                                          *
+     *		// Get Activiti services                                                                                        *
+     *		RepositoryService repositoryService = processEngine.getRepositoryService();                                     *
+     *		RuntimeService runtimeService = processEngine.getRuntimeService();                                              *
+     *                                                                                                                          *
+     *		// Deploy the process definition                                                                                * 
+     *		repositoryService.createDeployment().addClasspathResource("diagrams/FinancialReportProcess.bpmn20.xml")         *
+     *				.deploy();                                                                                      *
+     *                                                                                                                          *
+     * 		// start a process instance                                                                                     *
+     *		String procId = runtimeService.startProcessInstanceByKey("finalcialReport").getId();                            *         
+     *                                                                                                                          *   
+     *		// To verify the new process instance is started                                                                * 
+     *		log.info("Number of process Instances: " + runtimeService.createProcessInstanceQuery().count());                *
+     *                                                                                                                          *
+     *		// Logic for first Human task that is 'accountancy'                                                             * 
+     *                                                                                                                          *
+     *		// logic for adding task to the accountancy group                                                               *  
+     * 		TaskService taskService = processEngine.getTaskService();                                                       *
+     *		List<Task> tasks = taskService.createTaskQuery().taskCandidateGroup("accountancy").list();                      *
+     *		for (Task task : tasks) {                                                                                       *
+     *			log.info("Following task is available for the accountancy group: " + task.getName());                   *            
+     * 			// claiming the task                                                                                    *
+     *			taskService.claim(task.getId(), "fozzie");                                                              *
+     *		}                                                                                                               *
+     *		// Verify Fozzie can now retrieve the task                                                                      *
+     *		tasks = taskService.createTaskQuery().taskAssignee("fozzie").list();                                            *
+     *		for (Task task : tasks) {                                                                                       *
+     *			log.info("Task for fozzie: " + task.getName());                                                         *
+     *                                                                                                                          * 
+     *			// Completing the task                                                                                  *
+     *			taskService.complete(task.getId());                                                                     *
+     *			log.info("Accountancy task is successfully completed by fozzie");                                       *
+     *		}                                                                                                               *
+     *		log.info("Number of tasks for fozzie: " + taskService.createTaskQuery().taskAssignee("fozzie").count());        *
+     *                                                                                                                          *
+     *		// Logic for second Human task that is 'management'                                                             *
+     *                                                                                                                          *
+     *		// logic for adding task to accountancy group                                                                   *
+     *		tasks = taskService.createTaskQuery().taskCandidateGroup("management").list();                                  *
+     *		for (Task task : tasks) {                                                                                       * 
+     * 			log.info("Following task is available for management group " + task.getName());                         *
+     *			taskService.claim(task.getId(), "kermit");                                                              *
+     *		}                                                                                                               *
+     *                                                                                                                          *
+     *		// completing the second task and end the process                                                               *  
+     * 		for (Task task : tasks) {                                                                                       *
+     *			taskService.complete(task.getId());                                                                     *
+     *                   log.info("Managment task is successfully completed by kermit");                                        *
+     *		}                                                                                                               *
+     *                                                                                                                          *
+     *		// To verify that the process is ended                                                                          *
+     *		HistoryService historyService = processEngine.getHistoryService();                                              *
+     *		HistoricProcessInstance historicProcessInstance = historyService.createHistoricProcessInstanceQuery()           *
+     * 				.processInstanceId(procId).singleResult();                                                      * 
+     *		log.info("Process instance end time: " + historicProcessInstance.getEndTime());                                 * 
+     *	        }                                                                                                               * 
+     *          }                                                                                                               *
+     ****************************************************************************************************************************
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+ 
