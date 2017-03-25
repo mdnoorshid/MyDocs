@@ -1,0 +1,26 @@
+                    Important points
+				   ===================
+1.To take backup of dump file from mysql database
+===> mysqldump -u root -p roi > '/home/ubuntu/ROI_DUMP_FILE_25_03_17/roi_Tables.sql'
+2.To restore a database dump created with mysqldump.
+===>mysql -u username -p database_name < '/home/ubuntu/ROI_DUMP_FILE_25_03_17/roi_Tables.sql'
+3.To import csv file in mysql database
+  --->First run this command in terminal
+       ==> mysql --local-infile -uroot -proot key2act;
+  --->Next run the query in mysql terminal
+      ===> LOAD DATA LOCAL INFILE '/home/bizruntime/gpcustomer.csv' INTO TABLE gpcustomer FIELDS TERMINATED BY ',' ENCLOSED BY '"' LINES TERMINATED BY '\n'  IGNORE 1 LINES;
+	  **VVI: To avoid data loss we have to edit the csv and add all coulmns name in first line separated by ','.
+4.To import csv file in rds mysql 
+  --->First run this command in terminal
+     ==> mysql -h key2actsac.cwy4qibdig39.us-east-1.rds.amazonaws.com --local-infile -ukey2actsac -pkey2actsac123 key2act;
+      **After -h to .com ,this is the host name 
+  --->Next run the query in mysql terminal   
+    ==> LOAD DATA LOCAL INFILE '/home/ubuntu/RDSDB-migration/data/appointmentstatus.csv' INTO TABLE appointmentstatus FIELDS TERMINATED BY ',' ENCLOSED BY '"' LINES TERMINATED BY '\n'  IGNORE 1 LINES;  
+5.To get the csv files from cassandra db
+  	==> COPY location(tenantid,org,dex_row_id,address1,adrscode,alarm_flag,base_currency_id,bill_address_code,bill_customer_number,billing_currency_id,blanket_po_amt__remainin,blanket_po_amt_spent,blanket_po_cb,blanket_po_exp_date,blanket_po_number,city,civic1alpha,civic1dir,civic1num,civic2alpha,civic2dir,civic2num,cntcprsn,contact_name,cprcstnm,custname,custnmbr,divisions,fax,hold_transaction_id,inprocess,labor_group_name,local_currency_id,localtax,locatnnm,map_grid,mdfusrid,modifdt,modified_time,modifiedby,modifiedon,operation,orig_blanket_po_amt,out_of_service_flag,phone1,phone2,po_required,postdir,pricing_matrix_name,priority_of_call,rateclss,safety_flag,secaddalpha1,secaddalpha2,secaddnum1,secaddnum2,secaddtype1,secaddtype2,service_area,service_user_define_1,service_user_define_10,service_user_define_11,service_user_define_12,service_user_define_18,service_user_define_19,service_user_define_2,service_user_define_20,service_user_define_21,service_user_define_22,service_user_define_23,service_user_define_24,service_user_define_25,service_user_define_3,service_user_define_4,service_user_define_5,service_user_define_6,service_user_define_7,service_user_define_8,service_user_define_9,slprsnid,state,statecd,streetname,streettype,supervisors_hold_flag,supervisors_id,sutastat,sv_language_id,svslares,synchronizedon,technician,technician_2,technician_id,technician_id2,technician_team,time_zone,time_zone_tag,travel_rate_name,user_define_1a,user_define_2a,user_define_3a,user_define_4a,user_define_5a,user_define_6a,userid,usetaxschid,versionnumber,wennsoft_affiliate,wennsoft_branch,wennsoft_region,ws_latitude,ws_longitude,ws_pohdrorpolinerg,ws_ppvwriteoffamt,ws_ppvwriteoffpercent,wsreserved_cb1,wsreserved_cb10,wsreserved_cb2,wsreserved_cb3,wsreserved_cb4,wsreserved_cb5,wsreserved_cb6,wsreserved_cb7,wsreserved_cb8,wsreserved_cb9,wsreserved_str1,wsreserved_str2,zip)TO'/var/lib/cassandra/data/location.csv';  
+6.To export data in form of csv from mysql db
+  ==>mysql -u root -p roi -e "SELECT * from confignode" -B | sed "s/'/\'/;s/\t/\",\"/g;s/^/\"/;s/$/\"/;s/\n//g" > '/home/ubuntu/ROI_DUMP_FILE_25_03_17/confignodedata.csv';
+7.To import data in cassandra from csv
+  ==>COPY sourcelocationdata(tenantid,siteid,sourcetype,srclocid,adrscode,sigcustid,sigloccontact,siglocid,siglocname,sigphone,srccity,srccontact,srclocaddress,srclocname,srcphone,srcstate,srczip,timezone) 
+     FROM '/home/ubuntu/sourcelocationdata.csv'  
+     	
