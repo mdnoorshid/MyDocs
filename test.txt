@@ -1,2 +1,6 @@
+<<<<<<< Updated upstream
 Noorshid is writing something.
 Another line added by Madhavan.
+=======
+Noorshid is writing something.Added in first line.
+>>>>>>> Stashed changes
